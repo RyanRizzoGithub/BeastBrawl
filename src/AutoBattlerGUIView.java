@@ -57,7 +57,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	@Override
 	public void start(Stage stage) throws Exception {
 		stage.setTitle("Genshin Auto Battler");
-		Image background = new Image("Background.png");
+		Image background = new Image("/assets/Background.png");
 		gameBoard.setBackground(new Background(new BackgroundImage(background, null, null, null, null)));
 		createTopPlayer();
 		createBottomPlayer();
@@ -122,7 +122,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 			Rectangle placeHolder = new Rectangle(125,125,Color.TRANSPARENT);
 			
 			//how a card may be put on the board later, is used for now for testing
-			Image emptyCard = new Image("baseCard.png");
+			Image emptyCard = new Image("/assets/baseCard.png");
 			ImageView pic = new ImageView();
 			pic.setPreserveRatio(true);
 			pic.setImage(emptyCard);
@@ -208,7 +208,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 			}
 		});
 		
-		Image player1 = new Image("baseCard.png");
+		Image player1 = new Image("/assets/baseCard.png");
 		ImageView pic1 = new ImageView();
 		pic1.setPreserveRatio(true);
 		pic1.setImage(player1);
@@ -241,7 +241,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 			}
 		});
 		//this is the player card that is by itself
-		Image player2 = new Image("baseCard.png");
+		Image player2 = new Image("/assets/baseCard.png");
 		ImageView pic2 = new ImageView();
 		pic2.setPreserveRatio(true);
 		pic2.setImage(player2);
@@ -266,7 +266,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 			Rectangle placeHolder = new Rectangle(125,125,Color.TRANSPARENT);
 			
 			//how a card may be put on the board later is used for now for testing
-			Image emptyCard = new Image("baseCard.png");
+			Image emptyCard = new Image("/assets/baseCard.png");
 			ImageView pic = new ImageView();
 			pic.setPreserveRatio(true);
 			pic.setImage(emptyCard);
