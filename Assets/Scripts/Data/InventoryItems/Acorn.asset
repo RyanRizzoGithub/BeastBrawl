@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0237fc955e3ffbc489104719f12305c2, type: 3}
+  m_Name: Acorn
+  m_EditorClassIdentifier: 
+  <isStackable>k__BackingField: 1
+  <maxStackSize>k__BackingField: 12
+  <itemName>k__BackingField: Acorn
+  <description>k__BackingField: A Acorn
+  <image>k__BackingField: {fileID: -1547304772, guid: 1a3817dc0fa95394aafdcd324a9754fe, type: 3}
+  modifiersData:
+  - statModifier: {fileID: 11400000, guid: 94005662dc5080046a19b1b1b18c0e56, type: 2}
+    value: 10
+  <actionSFX>k__BackingField: {fileID: 8300000, guid: 1e5f7d6730c82864cb429bc4c62eed3f, type: 3}
