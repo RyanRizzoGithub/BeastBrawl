@@ -9,7 +9,7 @@ public class Bear {
 	
 	private int hp;
 	private int atk;
-	boolean isDead;
+	private boolean isDead;
 	
 	public Bear() {
 		this.hp = INIT_BEAR_HP;
