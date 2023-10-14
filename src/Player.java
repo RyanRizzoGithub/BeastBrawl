@@ -15,7 +15,7 @@ public class Player {
     private int health;
     private int gold;
     private int level;
-    //private Shop shop;
+    private Shop shop;
     private Item[] items;
     private int itemCount;
 
@@ -29,7 +29,7 @@ public class Player {
         health      = 30;
         gold        = 10;
         level 		= 1;
-       // shop 		= new Shop();
+        shop 		= new Shop();
         items 		= new Item[6];
         itemCount  	= 0;
     }
@@ -169,15 +169,15 @@ public class Player {
      * Gets the shop that the player is using
      * @return
      */
-   // public Shop getShop() {
-   // 	return shop;
-   // }
+    public Shop getShop() {
+    	return shop;
+    }
     
     /**
      * Buys the character denoted by the index in the shop, removes champion from
      * shop if player buys it
      * @param index
-     
+     */
     public Champion buyCharacter(int index) {
     	try {
     		Champion toBuy = shop.getShop()[index];
@@ -193,12 +193,10 @@ public class Player {
         	}
         	return toBuy;
     	} catch (Exception ArrayIndexOutOfBoundsException){
-    		return new Champion() {
-                //this aint right chief
-            };
+    		return new Hutao();
     	}
     }
-*/
+
     /**
      * returns the items the player has
      * @return an ArrayList of Items
@@ -229,9 +227,7 @@ public class Player {
     		return;
     	}
     	String itemType = item.getType();
-    	System.out.println(champion.getName());
     	if (champion.getWeaponType().equals(itemType)) {
-    		System.out.println("first");
     		if (item.getRarity() == 1) {
     			item.setAtk(2);
     		}
