@@ -5,7 +5,7 @@ public class Frog {
 	public final String name = "Frog";
 	public final int INIT_FROG_HP  = 2;
 	public final int INIT_FROG_ATK = 2;
-	public final int BOAR_PRICE = 1;
+	public final int FROG_PRICE = 1;
 	
 	private int hp;
 	private int atk;
