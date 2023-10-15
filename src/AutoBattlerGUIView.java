@@ -382,7 +382,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	}
 
 	// needs to take champ class card
-		private StackPane createCard(Champion champ) {
+	private StackPane createCard(Champion champ) {
 			Image emptyCard = new Image("baseCard.png");
 			ImageView pic = new ImageView();
 			pic.setPreserveRatio(true);
