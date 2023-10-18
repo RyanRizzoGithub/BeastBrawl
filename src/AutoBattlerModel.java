@@ -16,7 +16,8 @@ public class AutoBattlerModel extends Observable {
     private final Player p1;
     private final Player p2;
     private int round;
-
+    private int p1_attack_card;
+    private int p2_attack_card;
 
     /**
      * constructor for board object.
@@ -26,6 +27,8 @@ public class AutoBattlerModel extends Observable {
         p1 = new Player();
         p2 = new Player();
         round = 0;
+        p1_attack_card = 0;
+        p2_attack_card = 0;
     }
 
     /**
@@ -39,17 +42,17 @@ public class AutoBattlerModel extends Observable {
     	round += 1;
         Random rng = new Random();
         int attackRound = rng.nextInt(2);
-        boolean roundOver = false;
         while (isRoundOver() == 0) {
-
+        	//if attackround is 0 p1 attacks first
             if (attackRound % 2 == 0) { 
                 // p1 attacks
                 findChamps(rng, p1, p2);
             }
             else {
-                // p2 attacks
+                // p2 attacks first if attackround is 1
                 findChamps(rng, p2, p1);
             }
+            //allows attack turn to be switched
             attackRound++;
             setChanged();
         	notifyObservers(null);
@@ -59,17 +62,36 @@ public class AutoBattlerModel extends Observable {
         if (isRoundOver() == 1) {
         	p1.earnGold(2*round);
         	p2.earnGold(1*round);
-        	p2.loseHealth(round);
+        	//how they lose health now based on what round it is
+        	p2.loseHealth(calculate_damage(p1));
         //p2 won the round
         } else if (isRoundOver() == 2) {
         	p1.earnGold(1*round);
         	p2.earnGold(2*round);
-        	p1.loseHealth(round);
+        	//how they lose health now
+        	p1.loseHealth(calculate_damage(p2));
         }
         resetChampStats();
         setChanged();
     	notifyObservers(null);
        
+    }
+    
+    /*
+     * This method currently calculates the damage the losing player
+     * takes at the end of the round.
+     */
+    private int calculate_damage(Player winner) {
+    	// the i might be wrong here?
+    	int sum = 0;
+    	for(int i = 0; i < 6; i++) {
+    		if(winner.getBattleField()[i] == null) {
+    			continue;
+    		}else {
+    			sum += winner.getBattleField()[i].getAtk();
+    		}
+    	}
+    	return sum;
     }
     
     /**
@@ -150,27 +172,34 @@ public class AutoBattlerModel extends Observable {
      * @param defending Player that is defending.
      */
     private void findChamps(Random rng, Player attacking, Player defending) { 
-        int i = 0;
+        int i = attacking.get_attack_card();
         int j;
+        System.out.println("This player is attacking" + attacking.toString());
+        System.out.println("This player is defending" + defending.toString());
         Champion attacker = null;
-        int attackerLocation = -1;
         Champion defender = null;
-        int defenderLocation = -1;
+        //while loop finds current attacker or next available attacker.
         while (attacker == null || attacker.getHp() <= 0) {
             attacker = attacking.getBattleField()[i];
-            attackerLocation = i;
             if (i > 5)
                 i = 0;
             else
                 i++;
         }
+        //sets new attack card position
+        attacking.set_attack_card(i);
+        System.out.println("This is the attacker: " + attacker.getName());
         while (defender == null || defender.getHp() <= 0) {
             j = rng.nextInt(7);
+            //rng keeps choosing a random number until it can find a not empty slot
+            while(defending.getBattleField()[j] == null) {
+            	j = rng.nextInt(7);
+            }
             defender = defending.getBattleField()[j];
-            defenderLocation = j;
         }
+        System.out.println("This is the defender: " + defender.getName());
         int result = executeAttack(attacker, defender);
-        // TODO pass attacking and defending players and indices for their battlefield to Observer.
+        //TODO how should players be rewarded gold?
         if (result == 0) {
         	defending.earnGold(2);
         } else if (result == 1) {
@@ -197,6 +226,8 @@ public class AutoBattlerModel extends Observable {
 				p2BattleField[i].setAtk(p2BattleField[i].getInitialAtk());
 			}
 		}
+		p1.set_attack_card(0);
+		p2.set_attack_card(0);
 		setChanged();
     	notifyObservers(null);
     }
@@ -211,13 +242,13 @@ public class AutoBattlerModel extends Observable {
      */
     private int executeAttack(Champion attacker, Champion defender) {
         defender.loseHp(attacker.getAtk());
-        attacker.loseHp(defender.getAtk());
+       // attacker.loseHp(defender.getAtk());
         // both defending and attacking champ die
         if (defender.getHp() <= 0 && attacker.getHp() <= 0) {
         	return 3;
         } else if (defender.getHp() <= 0) {
         	return 1;
-        // if defender killed attacker
+        // if defender killed attacker, i dont think this can happen now?
         } else {
         	return 0;
         }

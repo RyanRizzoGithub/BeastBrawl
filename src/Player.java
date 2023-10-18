@@ -16,7 +16,7 @@ public class Player {
     private int gold;
     private int level;
     private Shop shop;
-    private int itemCount;
+    private int attacking_card;
 
     /**
      * Creates player object with default stats and zero champions.
@@ -29,7 +29,21 @@ public class Player {
         gold        = 10;
         level 		= 1;
         shop 		= new Shop();
-        itemCount  	= 0;
+        attacking_card  	= 0;
+    }
+    
+    /*
+     * Used to set which card in player deck is attacking first
+     */
+    public void set_attack_card(int position) {
+    	attacking_card = position;
+    }
+    
+    /*
+     * Used to get which card in player deck should be attacking first
+     */
+    public int get_attack_card() {
+    	return attacking_card;
     }
 
     /**

@@ -101,7 +101,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		timer.setTextFill(Color.BLACK);
 		Timer timer1 = new Timer();
 		TimerTask task = new TimerTask() {
-			int seconds = 30;
+			int seconds = 10;
 			int i = 0;
 
 			@Override
