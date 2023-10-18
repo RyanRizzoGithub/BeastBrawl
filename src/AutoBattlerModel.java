@@ -173,15 +173,11 @@ public class AutoBattlerModel extends Observable {
         // TODO pass attacking and defending players and indices for their battlefield to Observer.
         if (result == 0) {
         	defending.earnGold(2);
-        	giveItem(defending);
         } else if (result == 1) {
         	attacking.earnGold(2);
-        	giveItem(attacking);
         }else {
         	attacking.earnGold(2);
         	defending.earnGold(2);
-        	giveItem(defending);
-        	giveItem(attacking);
         }
     }
     
@@ -205,38 +201,6 @@ public class AutoBattlerModel extends Observable {
     	notifyObservers(null);
     }
     
-    /**
-     * gives a chance for an item to drop for the player, if the players level is 
-     * higher, better items. 7% chance of getting an item when a champion dies
-     * 
-     * @param player
-     * @return the Item that the player is rewarded with
-     */
-    private void giveItem(Player player) {
-    	//idk why but it makes me add all of the items one by one
-    	Random rand = new Random();
-    	ArrayList<Item> oneStars = new ArrayList<Item>(Arrays.asList(
-    			new Dull_Blade(), new Great_Sword(), new Polearm(),
-    			new Basic_Book(), new Regular_Bow()));
-    	ArrayList<Item> twoStars = new ArrayList<Item>(Arrays.asList(
-    			new Festering_Desire(), new Dragon_Pike(), new Rain_Slasher(),
-    			new Favonius_Book(), new Moonbow()));
-    	ArrayList<Item> threeStars = new ArrayList<Item>(Arrays.asList(
-    			new Skyward_Blade(), new Homa(), new Grave_Stone(),
-    			new Electro_Book(), new Polarstar()));
-    	int chance = rand.nextInt(100); 
-    	int weaponSelection = rand.nextInt(5);
-    	// 3% chance for 3 star
-    	if (chance <= 2 + player.getLevel()) {
-    		player.addItem(threeStars.get(weaponSelection));
-    	} else if (chance <= 5 + player.getLevel()) {
-    		player.addItem(twoStars.get(weaponSelection));
-    	} else if (chance <= 7 + player.getLevel()) {
-    		player.addItem(oneStars.get(weaponSelection));
-    	}
-    	setChanged();
-    	notifyObservers(player);
-    }
     
     /**
      * Executes one attack. Subtracts each champions HP by the attack of the other Champion.
@@ -470,9 +434,6 @@ public class AutoBattlerModel extends Observable {
     			i += 1;
     		}
     		benchToBattle(firstChampLocation, p2, i);
-    	}
-    	for (int i = 0; i < 6; i++) {
-    		p2.useItem(p2.getItems()[0], p2.getBattleField()[0]);
     	}
     	setChanged();
     	notifyObservers(null);

@@ -103,24 +103,7 @@ public class AutoBattlerController{
 		model.buyCharacter(player,location);
 	}
 	
-	/**
-	 * Uses the item that the player wants on the champion that they selected
-	 * @param player the player with the item
-	 * @param item the item that they want to use
-	 * @param champion the champion that they want to use the item on
-	 */
-	public void useItem(Player player, Item item, Champion champion) { 
-		player.useItem(item, champion);
-	}
 	
-	/**
-	 * returns an arrayList of all the items the player has in inventory
-	 * @param player the player we're looking at
-	 * @return an ArrayList of items
-	 */
-	public Item[] getItems(Player player){
-		return player.getItems();
-	}
 	
 	public Player getP1() {
 		return model.getP1();

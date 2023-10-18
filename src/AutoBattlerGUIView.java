@@ -328,40 +328,11 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		FlowPane flow = new FlowPane();
 		flow.setHgap(8);
 		flow.setPadding(new Insets(7));
-		for (int i = 0; i < 7; i++) {
-			if (i == 3)
-				flow.getChildren().add(stats);
-			else {
-				Rectangle rec = new Rectangle(120, 110, Color.TRANSPARENT);
-				StackPane backgroundSpace = new StackPane(rec);
-				backgroundSpace.setBackground(new Background(new BackgroundFill(Color.AQUA, null, null)));
-				flow.getChildren().add(backgroundSpace);
-			}
-		}
+		flow.getChildren().add(stats);	
+		flow.setAlignment(Pos.BASELINE_CENTER);
 		return flow;
 	}
 	
-	private ImageView createItemImage(Item item, StackPane sPane) {
-		Image reroll = new Image(item.getName() + ".png");
-        ImageView pic = new ImageView();
-        pic.setPreserveRatio(true);
-        pic.setImage(reroll);
-        pic.setFitHeight(70);
-        pic.setOnMouseClicked((event) -> {
-        	if(moveCards[0] != null) {
-        		Player p1 = controller.getP1();
-        		
-        		int index = moveCards[0].indices[1];
-        		Champion champ = p1.getBattleField()[index];
-        		sPane.getChildren().remove(1);
-        		controller.useItem(p1, item, champ);
-        		moveCards = new Pair[2];
-        		
-        	}
-        });
-        return pic;
-		
-	}
 
 	/**
 	 * helper method that creates an Hbox of how the bench will look like
@@ -547,7 +518,6 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		remakeHbox(bottomBench, bench);
 		changeStats(1);
 		FlowPane fPane = (FlowPane) bottomPlayer.getChildren().get(1);
-		updateItems(fPane);
 		if (!attackPhase) {
 			Champion[] shopCards = controller.getShop(p1);
 
@@ -568,25 +538,6 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		}
 
 	}
-	
-	private void updateItems(FlowPane pane) {
-		Player p1 = controller.getP1();
-		Item[] itemArray = p1.getItems();
-		int itemIndex = 0;
-		for(int index = 0; index < pane.getChildren().size() ; index++) {
-			if(index == 3) {
-				index++;
-			}
-			if(itemArray[itemIndex] == null) {
-				itemIndex++;
-				continue;
-			}
-			StackPane sPane = (StackPane) pane.getChildren().get(index);
-			ImageView item = createItemImage(itemArray[itemIndex], sPane);
-			sPane.getChildren().add(item);
-			itemIndex++;
-			}
-		}
 
 	private void remakeHbox(HBox cardArea, Champion[] champSlots) {
 

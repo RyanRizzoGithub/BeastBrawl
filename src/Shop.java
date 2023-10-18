@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
+import src.cards.Bear;
+
 public class Shop {
 	private Champion[] shop;
 	private ArrayList<Champion> ones = new ArrayList<>(Arrays.asList(

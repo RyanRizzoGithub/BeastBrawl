@@ -16,7 +16,6 @@ public class Player {
     private int gold;
     private int level;
     private Shop shop;
-    private Item[] items;
     private int itemCount;
 
     /**
@@ -30,7 +29,6 @@ public class Player {
         gold        = 10;
         level 		= 1;
         shop 		= new Shop();
-        items 		= new Item[6];
         itemCount  	= 0;
     }
 
@@ -195,60 +193,6 @@ public class Player {
     	} catch (Exception ArrayIndexOutOfBoundsException){
     		return new Hutao();
     	}
-    }
-
-    /**
-     * returns the items the player has
-     * @return an ArrayList of Items
-     */
-    public Item[] getItems() {
-    	return items;
-    }
-
-    /**
-     * adds the item to the pool of the players items
-     * @param item
-     */
-    public void addItem(Item item) {
-    	if (itemCount >= 6) {
-    		return;
-    	}
-    	items[itemCount] = item;
-    	itemCount += 1;
-    }
-
-    /**
-     * Places the item on the champion, removes that item from the list
-     * @param item
-     * @param champion
-     */
-    public void useItem(Item item, Champion champion) {
-    	if (item == null || champion == null) {
-    		return;
-    	}
-    	String itemType = item.getType();
-    	if (champion.getWeaponType().equals(itemType)) {
-    		if (item.getRarity() == 1) {
-    			item.setAtk(2);
-    		}
-    		if (item.getRarity() == 2) {
-    			item.setAtk(4);
-    		}
-    		if (item.getRarity() == 3) {
-    			item.setAtk(6);
-    		}
-        	champion.addItem(item);
-        	for (int i = 0; i < 6; i++) {
-        		if (items[i].equals(item)) {
-        			items[i] = null;
-        		}
-        	}
-        	itemCount -= 1;
-    	}
-    }
-    
-    public int getItemCount() {
-    	return itemCount;
     }
     
 }

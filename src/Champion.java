@@ -186,13 +186,6 @@ public abstract class Champion {
     	return weaponType;
     }
     
-    /**
-     * Adds Item stats to the Champion
-     * @param item the item we're adding
-     */
-    public void addItem(Item item) {
-    	initialAtk += item.getAtk();
-    }
 }
 
 
