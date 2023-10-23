@@ -3,6 +3,8 @@ package src;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import Creatures.Creature;
+
 public class AutoBattlerController{
 	AutoBattlerModel model;
 
@@ -30,7 +32,7 @@ public class AutoBattlerController{
         model.resetChampStats();
     }
 	
-	public Champion[] getShop(Player player){
+	public Creature[] getShop(Player player){
 		return model.getShop(player);
 	}
 	
@@ -44,16 +46,16 @@ public class AutoBattlerController{
 	
 	/**
 	 * Call this right before we call attack Phase
-	 */
+	
 	public void giveTraitBonuses() {
 		model.giveOutTraitBonuses(model.getP1());
 		model.giveOutTraitBonuses(model.getP2());
 	}
-	
+	*/
 	/**
 	 * call whenever
 	 * @return
-	 */
+	
 	public String getActiveTraits() { 
 		String res = "";
 		HashMap<String, Integer> traits = model.getP1().getTraits();
@@ -65,8 +67,8 @@ public class AutoBattlerController{
 		}
 		return res;
 	}
-	
-	public Champion[] rerollShop(Player player){
+	 */
+	public Creature[] rerollShop(Player player){
 		return model.rerollShop(player);
 	}
 

@@ -1,4 +1,4 @@
-package src.Creatures;
+package Creatures;
 import src.Card;
 
 public class Duck extends Creature {

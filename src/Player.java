@@ -4,14 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import Creatures.Creature;
+import Creatures.Wolf;
+
 /**
  * Creates a player object that hasA battleField and bench that contain all the champions
  *      owned by the player.
  * Also tracks health and gold count.
  */
 public class Player {
-    private final Champion[] battleField;
-    private final Champion[] bench;
+    private final Creature[] battleField;
+    private final Creature[] bench;
     private int health;
     private int gold;
     private int level;
@@ -23,8 +26,8 @@ public class Player {
      * Initializes battleField array to only allow 7 champions, located by index.
      */
     public Player() {
-        battleField = new Champion[7];
-        bench       = new Champion[7];
+        battleField = new Creature[7];
+        bench       = new Creature[7];
         health      = 30;
         gold        = 10;
         level 		= 1;
@@ -90,7 +93,7 @@ public class Player {
      * Allows access to player's champions in the bench.
      * @return Arraylist of champions.
      */
-    public Champion[] getBench() {
+    public Creature[] getBench() {
         return bench;
     }
     
@@ -98,7 +101,7 @@ public class Player {
      * Returns all traits on the battlefield regardless of if they give the 
      * trait bonus or not
      * @return a hashmap containing all the traits and how many there are
-     */
+     
     public HashMap<String, Integer> getTraits() {
     	HashMap<String, Integer> map = new HashMap<>();
     	ArrayList<String> namesAlreadyAdded = new ArrayList<String>();
@@ -120,12 +123,12 @@ public class Player {
     		}
     	}
     	return map;
-    }
+    } 
     
     /**
      * Returns all the traits that can give bonuses on the board
      * @return a hashmap containing all the traits and how many there are
-     */
+     
     public HashMap<String, Integer> getActiveTraits(){
     	HashMap<String, Integer> map = getTraits();
     	HashMap<String, Integer> newMap = new HashMap<>();
@@ -139,12 +142,12 @@ public class Player {
     	}
 		return newMap;
     }
-    
+    */
     /**
      * Allows access to player's champions on the battlefield.
      * @return Array of champions.
      */
-    public Champion[] getBattleField() {
+    public Creature[] getBattleField() {
         return battleField;
     }
     
@@ -190,22 +193,23 @@ public class Player {
      * shop if player buys it
      * @param index
      */
-    public Champion buyCharacter(int index) {
+    public Creature buyCharacter(int index) {
     	try {
-    		Champion toBuy = shop.getShop()[index];
+    		Creature toBuy = shop.getShop()[index];
     		int i = 0;
             while (bench[i] != null)
                 i++;
         	if (i <= 7 && toBuy != null) {
-        		if (gold >= toBuy.getStars()) {
+        		if (gold >= toBuy.getPrice()) {
         			bench[i] = toBuy;
-        			spendGold(toBuy.getStars());
+        			spendGold(toBuy.getPrice());
         			shop.getShop()[index] = null;
         		}
         	}
         	return toBuy;
     	} catch (Exception ArrayIndexOutOfBoundsException){
-    		return new Hutao();
+    		//not sure what this is yet
+    		return new Wolf();
     	}
     }
     

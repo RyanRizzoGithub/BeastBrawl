@@ -8,6 +8,7 @@ import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import Creatures.Creature;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -77,19 +78,6 @@ public class AutoBattlerGUIView extends Application implements Observer {
 
 		// if in shop phase make another thing
 		Scene scene = new Scene(gameBoard);
-
-		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-
-			@Override
-			public void handle(KeyEvent event) {
-				// TODO Auto-generated method stub
-				switch(event.getCode()) {
-				case ESCAPE:
-					InfoBox.disply("Info Menu", "Press Ok To Go Back");
-				}
-			}
-			
-		});
 		
 		stage.setScene(scene);
 		stage.show();
@@ -101,7 +89,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		timer.setTextFill(Color.BLACK);
 		Timer timer1 = new Timer();
 		TimerTask task = new TimerTask() {
-			int seconds = 10;
+			int seconds = 30;
 			int i = 0;
 
 			@Override
@@ -131,7 +119,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		gameBoard.setTop(topPlayer);
 		gameBoard.setMargin(topPlayer, new Insets(10,10,10,10));
 		controller.AIturn();
-		controller.giveTraitBonuses();
+		//controller.giveTraitBonuses();
 		controller.startAttackPhase();
 		attackPhase = false;
 		
@@ -353,23 +341,16 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	}
 
 	// needs to take champ class card
-	private StackPane createCard(Champion champ) {
-			Image emptyCard = new Image("baseCard.png");
+	private StackPane createCard(Creature champ) {
+			//gets base card pic?
+			String cardName = ("/assets/" + champ.getCard().getName().toLowerCase() + "Card.png");
+			Image emptyCard = new Image(cardName);
 			ImageView pic = new ImageView();
 			pic.setPreserveRatio(true);
 			pic.setImage(emptyCard);
 			pic.setFitHeight(125);
-			String name = champ.getName();
-			Image champion = new Image(name + ".png");
-			ImageView champPic = new ImageView();
-			champPic.setPreserveRatio(true);
-			champPic.setImage(champion);
-			if (name.toLowerCase().equals("kokomi") || name.toLowerCase().equals("amber")
-					|| name.toLowerCase().equals("ningguang") || name.toLowerCase().equals("ayaka")) {
-				champPic.setFitHeight(50);
-			} else {
-				champPic.setFitHeight(75);
-			}
+			
+			//TODO check if this gets correct stats
 			StackPane pane = new StackPane();
 			String attackStr = Integer.toString(champ.getAtk());
 			String hpStr = Integer.toString(champ.getHp());
@@ -379,30 +360,21 @@ public class AutoBattlerGUIView extends Application implements Observer {
 			Label attack = new Label(attackStr);
 			attack.setTextFill(Color.BLACK);
 
-			String star = Integer.toString(champ.getStars());
-			Label nameLabel = new Label(name);
-			nameLabel.setTextFill(Color.BLACK);
-
 			Image money = new Image("coin.png");
 			ImageView moneyView = new ImageView(money);
 			moneyView.setPreserveRatio(true);
 			moneyView.setFitHeight(18);
 
-			Label moneyText = new Label("" + champ.getStars());
+			Label moneyText = new Label("" + champ.getPrice());
 			moneyText.setTextFill(Color.YELLOW);
 			moneyText.setOpacity(100);
 
-			Label element = new Label("Element: " + champ.getType());
-			element.setTextFill(Color.BLACK);
-
 			pane.setAlignment(Pos.CENTER);
-			pane.getChildren().addAll(pic, champPic, hp, attack, nameLabel, moneyView, moneyText, element);
-			pane.setMargin(attack, new Insets(50, 0, 0, 40));
-			pane.setMargin(hp, new Insets(50, 25, 0, 0));
-			pane.setMargin(nameLabel, new Insets(0, 0, 80, 0));
+			pane.getChildren().addAll(pic, hp, attack, moneyView, moneyText);
+			pane.setMargin(attack, new Insets(105, -10, 0, 40));
+			pane.setMargin(hp, new Insets(105, 15, 0, 0));	
 			pane.setMargin(moneyView, new Insets(0, 50, 110, 0));
 			pane.setMargin(moneyText, new Insets(0, 25, 110, 0));
-			pane.setMargin(element, new Insets(80, 0, 0, 10));
 			return pane;
 		}
 
@@ -411,7 +383,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		shop = new VBox(8);
 		controller.startShopPhase();
 		Player player = controller.getP1();
-		Champion[] shopArray = controller.getShop(player);
+		Creature[] shopArray = controller.getShop(player);
 
 		cardsForSale = createChampSlots();
 		for (int index = 0; index < shopArray.length; index++) {
@@ -511,22 +483,22 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	public void update(Observable o, Object arg) {
 		// should add if arg is player 1
 		Player p1 = controller.getP1();
-		Champion[] champSlots = p1.getBattleField();
+		Creature[] champSlots = p1.getBattleField();
 		remakeHbox(bottomChampions, champSlots);
 
-		Champion[] bench = p1.getBench();
+		Creature[] bench = p1.getBench();
 		remakeHbox(bottomBench, bench);
 		changeStats(1);
 		FlowPane fPane = (FlowPane) bottomPlayer.getChildren().get(1);
 		if (!attackPhase) {
-			Champion[] shopCards = controller.getShop(p1);
+			Creature[] shopCards = controller.getShop(p1);
 
 			remakeHbox(cardsForSale, shopCards);
 				
 		}else {
 
 			Player p2 = controller.getP2();
-			Champion[] champSlots2 = p2.getBattleField();
+			Creature[] champSlots2 = p2.getBattleField();
 			remakeHbox(topChampions, champSlots2);
 			changeStats(2);
 
@@ -539,7 +511,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 
 	}
 
-	private void remakeHbox(HBox cardArea, Champion[] champSlots) {
+	private void remakeHbox(HBox cardArea, Creature[] champSlots) {
 
 		for (Node node : cardArea.getChildren()) {
 			StackPane pane = (StackPane) node;
@@ -570,12 +542,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 			Label money = (Label) bottomStats.getChildren().get(5);
 			money.setText("" + p1.getGold());
 			
-			Label buffs = (Label) bottomStats.getChildren().get(2);
-
-			buffs.setTextFill(Color.SNOW);
-			buffs.setText(controller.getActiveTraits());
-
-			buffs.setText("Buffs: " + controller.getActiveTraits());
+			
 
 			Label hp = (Label) bottomStats.getChildren().get(3);
 			hp.setText("" + p1.getHealth());
@@ -583,8 +550,6 @@ public class AutoBattlerGUIView extends Application implements Observer {
 			Player p2 = controller.getP2();
 			Label money = (Label) bottomStats.getChildren().get(5);
 			money.setText("" + p2.getGold());
-			Label buffs = (Label) bottomStats.getChildren().get(2);
-			buffs.setText(controller.getActiveTraits());
 			Label hp = (Label) bottomStats.getChildren().get(3);
 			hp.setText("" + p2.getHealth());
 		}

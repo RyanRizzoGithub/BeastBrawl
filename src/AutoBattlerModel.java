@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Observable;
 import java.util.Random;
 
+import Creatures.Creature;
+
 
 /**
  * Model represents the board on which the game state is changed and updated.
@@ -26,7 +28,7 @@ public class AutoBattlerModel extends Observable {
     public AutoBattlerModel() {
         p1 = new Player();
         p2 = new Player();
-        round = 0;
+        round = 1;
         p1_attack_card = 0;
         p2_attack_card = 0;
     }
@@ -88,7 +90,7 @@ public class AutoBattlerModel extends Observable {
     		if(winner.getBattleField()[i] == null) {
     			continue;
     		}else {
-    			sum += winner.getBattleField()[i].getAtk();
+    			sum += winner.getBattleField()[i].getPrice();
     		}
     	}
     	return sum;
@@ -97,7 +99,7 @@ public class AutoBattlerModel extends Observable {
     /**
      * Gives out Trait bonuses on the players battlefield
      * @param player the current player
-     */
+     
     public void giveOutTraitBonuses(Player player) {
     	HashMap<String, Integer> traits = player.getActiveTraits();
     	for (String bonus: traits.keySet()) {
@@ -113,6 +115,7 @@ public class AutoBattlerModel extends Observable {
     	setChanged();
     	notifyObservers(player);
     }
+    */
     
     /**
      * Begins the shop phase by setting a new shop for both players
@@ -129,7 +132,7 @@ public class AutoBattlerModel extends Observable {
      * @param player the player whos shop is chosen
      * @return
      */
-    public Champion[] getShop(Player player){
+    public Creature[] getShop(Player player){
     	return player.getShop().getShop();
     }
    
@@ -139,7 +142,7 @@ public class AutoBattlerModel extends Observable {
      * @param player the player who wants to re-roll
      * @return
      */
-    public Champion[] rerollShop(Player player){
+    public Creature[] rerollShop(Player player){
     	if (player.getGold() > 0) {
     		player.spendGold(1);
     		setChanged();
@@ -176,8 +179,8 @@ public class AutoBattlerModel extends Observable {
         int j;
         System.out.println("This player is attacking" + attacking.toString());
         System.out.println("This player is defending" + defending.toString());
-        Champion attacker = null;
-        Champion defender = null;
+        Creature attacker = null;
+        Creature defender = null;
         //while loop finds current attacker or next available attacker.
         while (attacker == null || attacker.getHp() <= 0) {
             attacker = attacking.getBattleField()[i];
@@ -188,7 +191,7 @@ public class AutoBattlerModel extends Observable {
         }
         //sets new attack card position
         attacking.set_attack_card(i);
-        System.out.println("This is the attacker: " + attacker.getName());
+        System.out.println("This is the attacker: " + attacker.getCard().getName());
         while (defender == null || defender.getHp() <= 0) {
             j = rng.nextInt(7);
             //rng keeps choosing a random number until it can find a not empty slot
@@ -197,7 +200,7 @@ public class AutoBattlerModel extends Observable {
             }
             defender = defending.getBattleField()[j];
         }
-        System.out.println("This is the defender: " + defender.getName());
+        System.out.println("This is the defender: " + defender.getCard().getName());
         int result = executeAttack(attacker, defender);
         //TODO how should players be rewarded gold?
         if (result == 0) {
@@ -214,16 +217,16 @@ public class AutoBattlerModel extends Observable {
      * resets traits of champions on battlefield
      */
     public void resetChampStats() {
-    		Champion[] p1BattleField = p1.getBattleField();
-    		Champion[] p2BattleField = p2.getBattleField();
+    		Creature[] p1BattleField = p1.getBattleField();
+    		Creature[] p2BattleField = p2.getBattleField();
 		for (int i = 0; i < 7; i++) {
 			if (p1BattleField[i] != null) {
-				p1BattleField[i].setHp(p1BattleField[i].getInitialHp());
-				p1BattleField[i].setAtk(p1BattleField[i].getInitialAtk());
+				p1BattleField[i].getCard().setHp(p1BattleField[i].getCard().getInitialHp());
+				p1BattleField[i].getCard().setAtk(p1BattleField[i].getCard().getInitialAtk());
 			}
 			if (p2BattleField[i] != null) {
-				p2BattleField[i].setHp(p2BattleField[i].getInitialHp());
-				p2BattleField[i].setAtk(p2BattleField[i].getInitialAtk());
+				p2BattleField[i].getCard().setHp(p2BattleField[i].getCard().getInitialHp());
+				p2BattleField[i].getCard().setAtk(p2BattleField[i].getCard().getInitialAtk());
 			}
 		}
 		p1.set_attack_card(0);
@@ -240,13 +243,18 @@ public class AutoBattlerModel extends Observable {
      * @return returns 0 if the defending champ killed the attacker, 1 if other way around, 
      * and 3 if they both died
      */
-    private int executeAttack(Champion attacker, Champion defender) {
-        defender.loseHp(attacker.getAtk());
+    private int executeAttack(Creature attacker, Creature defender) {
+    	//TODO set buffs or debuffs?
+    	//Something feels wrong here
+    	System.out.println(defender.getCard().getHp());
+        defender.getCard().loseHp(attacker.getAtk());
+        System.out.println(defender.getCard().getHp());
+       
        // attacker.loseHp(defender.getAtk());
         // both defending and attacking champ die
-        if (defender.getHp() <= 0 && attacker.getHp() <= 0) {
+        if (defender.getCard().getHp() <= 0 && attacker.getCard().getHp() <= 0) {
         	return 3;
-        } else if (defender.getHp() <= 0) {
+        } else if (defender.getCard().getHp() <= 0) {
         	return 1;
         // if defender killed attacker, i dont think this can happen now?
         } else {
@@ -335,7 +343,7 @@ public class AutoBattlerModel extends Observable {
         if (player.getBattleField()[origin] == null) {
         	return false;
         }
-        Champion temp = player.getBench()[destination];
+        Creature temp = player.getBench()[destination];
         player.getBench()[destination] = player.getBattleField()[origin];
         player.getBattleField()[origin] = temp;
         setChanged();
@@ -358,7 +366,7 @@ public class AutoBattlerModel extends Observable {
     	}
         if (player.getBench()[origin] == null)
             return false;
-        Champion temp = player.getBattleField()[destination];
+        Creature temp = player.getBattleField()[destination];
         player.getBattleField()[destination] = player.getBench()[origin];
         player.getBench()[origin] = temp;
         setChanged();
@@ -380,14 +388,14 @@ public class AutoBattlerModel extends Observable {
         if (origin[0] == 0) {
             if (player.getBench()[origin[1]] == null && player.getBench()[destination] == null)
                 return false;
-            Champion temp = player.getBench()[origin[1]];
+            Creature temp = player.getBench()[origin[1]];
             player.getBench()[origin[1]] = player.getBench()[destination];
             player.getBench()[destination] = temp;
         }
         else {
             if (player.getBattleField()[origin[1]] == null && player.getBattleField()[destination] == null)
                 return false;
-            Champion temp = player.getBattleField()[origin[1]];
+            Creature temp = player.getBattleField()[origin[1]];
             player.getBattleField()[origin[1]] = player.getBattleField()[destination];
             player.getBattleField()[destination] = temp;
         }
@@ -415,19 +423,19 @@ public class AutoBattlerModel extends Observable {
 	 */
     public void sellChampion(Player player, int benchOrBattleField, int index) {
     	if (benchOrBattleField == 0) {
-    		Champion toRemove = player.getBench()[index];
+    		Creature toRemove = player.getBench()[index];
     		if (toRemove == null) {
     			return;
     		}
     		player.getBench()[index] = null;
-    		player.earnGold(toRemove.getStars());
+    		player.earnGold(toRemove.getPrice());
     	} else if (benchOrBattleField == 1) {
-    		Champion toRemove = player.getBattleField()[index];
+    		Creature toRemove = player.getBattleField()[index];
     		if (toRemove == null) {
     			return;
     		}
     		player.getBattleField()[index] = null;
-    		player.earnGold(toRemove.getStars());
+    		player.earnGold(toRemove.getPrice());
     	}
     	setChanged();
     	notifyObservers(player);

@@ -1,4 +1,4 @@
-package src.Creatures;
+package Creatures;
 import src.Card;
 
 public class Bunny extends Creature{
@@ -27,9 +27,6 @@ public class Bunny extends Creature{
 		card.setAtk(this.atk);
 		return card;
 	}
-	
-	@Override
-	public String getName() { return name; }
 	
 	@Override
 	public int getHp() { return hp; }

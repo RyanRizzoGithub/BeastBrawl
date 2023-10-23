@@ -1,4 +1,4 @@
-package src.Creatures;
+package Creatures;
 
 import src.Card;
 
@@ -10,6 +10,8 @@ public class Creature {
 	protected boolean isDead;
 
 	public int getHp() { return hp; }
+	
+	public String getName() {return name;}
 
 	public void adjustHp(int amount) { hp += amount; }
 	

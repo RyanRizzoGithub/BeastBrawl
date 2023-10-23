@@ -1,4 +1,4 @@
-package src.Creatures;
+package Creatures;
 import src.Card;
 
 public class Cat extends Creature {
@@ -28,9 +28,6 @@ public class Cat extends Creature {
 	}
 	
 	@Override
-	public String getName() { return name; }
-	
-	@Override
 	public int getHp() { return hp; }
 
 	@Override
@@ -45,7 +42,7 @@ public class Cat extends Creature {
 	@Override
 	public int getPrice() { return price; };
 	
-	@Overrie
+	@Override
 	public boolean isDead() {
 		return this.isDead;
 	}
