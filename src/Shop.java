@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Random;
 
 import Creatures.Creature;
-import src.cards.Bear;
 
 public class Shop {
 	private Creature[] shop;
@@ -28,7 +27,7 @@ public class Shop {
 	}
 	
 	public Creature[] rerollShop(int level) {
-		//TODO this may be incorrect
+		//TODO this may be incorrect/ we should change to what we want
 		shop = deck.drawShop(level);
 		return shop;
 	}

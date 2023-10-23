@@ -217,16 +217,17 @@ public class AutoBattlerModel extends Observable {
      * resets traits of champions on battlefield
      */
     public void resetChampStats() {
+    	//something aint right here
     		Creature[] p1BattleField = p1.getBattleField();
     		Creature[] p2BattleField = p2.getBattleField();
 		for (int i = 0; i < 7; i++) {
 			if (p1BattleField[i] != null) {
-				p1BattleField[i].getCard().setHp(p1BattleField[i].getCard().getInitialHp());
-				p1BattleField[i].getCard().setAtk(p1BattleField[i].getCard().getInitialAtk());
+				p1BattleField[i].setHp(p1BattleField[i].getCard().getInitialHp());
+				//p1BattleField[i].getCard().setAtk(p1BattleField[i].getCard().getInitialAtk());
 			}
 			if (p2BattleField[i] != null) {
-				p2BattleField[i].getCard().setHp(p2BattleField[i].getCard().getInitialHp());
-				p2BattleField[i].getCard().setAtk(p2BattleField[i].getCard().getInitialAtk());
+				p2BattleField[i].setHp(p2BattleField[i].getCard().getInitialHp());
+				//p2BattleField[i].getCard().setAtk(p2BattleField[i].getCard().getInitialAtk());
 			}
 		}
 		p1.set_attack_card(0);
@@ -246,15 +247,17 @@ public class AutoBattlerModel extends Observable {
     private int executeAttack(Creature attacker, Creature defender) {
     	//TODO set buffs or debuffs?
     	//Something feels wrong here
-    	System.out.println(defender.getCard().getHp());
-        defender.getCard().loseHp(attacker.getAtk());
-        System.out.println(defender.getCard().getHp());
+    	System.out.println(defender.getHp());
+    	
+        defender.adjustHp(-attacker.getAtk());
+        
+        System.out.println(defender.getHp());
        
        // attacker.loseHp(defender.getAtk());
         // both defending and attacking champ die
-        if (defender.getCard().getHp() <= 0 && attacker.getCard().getHp() <= 0) {
+        if (defender.getHp() <= 0 && attacker.getHp() <= 0) {
         	return 3;
-        } else if (defender.getCard().getHp() <= 0) {
+        } else if (defender.getHp() <= 0) {
         	return 1;
         // if defender killed attacker, i dont think this can happen now?
         } else {
