@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.Observable;
 import java.util.Random;
 
-import Creatures.Creature;
+//import Creatures.Creature;
+import src.cards.*;
 
 
 /**
@@ -132,7 +133,7 @@ public class AutoBattlerModel extends Observable {
      * @param player the player whos shop is chosen
      * @return
      */
-    public Creature[] getShop(Player player){
+    public Card[] getShop(Player player){
     	return player.getShop().getShop();
     }
    
@@ -142,7 +143,7 @@ public class AutoBattlerModel extends Observable {
      * @param player the player who wants to re-roll
      * @return
      */
-    public Creature[] rerollShop(Player player){
+    public Card[] rerollShop(Player player){
     	if (player.getGold() > 0) {
     		player.spendGold(1);
     		setChanged();
@@ -179,8 +180,8 @@ public class AutoBattlerModel extends Observable {
         int j;
         System.out.println("This player is attacking" + attacking.toString());
         System.out.println("This player is defending" + defending.toString());
-        Creature attacker = null;
-        Creature defender = null;
+        Card attacker = null;
+        Card defender = null;
         //while loop finds current attacker or next available attacker.
         while (attacker == null || attacker.getHp() <= 0) {
             attacker = attacking.getBattleField()[i];
@@ -191,7 +192,7 @@ public class AutoBattlerModel extends Observable {
         }
         //sets new attack card position
         attacking.set_attack_card(i);
-        System.out.println("This is the attacker: " + attacker.getCard().getName());
+        System.out.println("This is the attacker: " + attacker.getName());
         while (defender == null || defender.getHp() <= 0) {
             j = rng.nextInt(7);
             //rng keeps choosing a random number until it can find a not empty slot
@@ -200,8 +201,9 @@ public class AutoBattlerModel extends Observable {
             }
             defender = defending.getBattleField()[j];
         }
-        System.out.println("This is the defender: " + defender.getCard().getName());
+        System.out.println("This is the defender: " + defender.getName());
         int result = executeAttack(attacker, defender);
+        
         //TODO how should players be rewarded gold?
         if (result == 0) {
         	defending.earnGold(2);
@@ -218,15 +220,15 @@ public class AutoBattlerModel extends Observable {
      */
     public void resetChampStats() {
     	//something aint right here
-    		Creature[] p1BattleField = p1.getBattleField();
-    		Creature[] p2BattleField = p2.getBattleField();
+    		Card[] p1BattleField = p1.getBattleField();
+    		Card[] p2BattleField = p2.getBattleField();
 		for (int i = 0; i < 7; i++) {
 			if (p1BattleField[i] != null) {
-				p1BattleField[i].setHp(p1BattleField[i].getCard().getInitialHp());
+				p1BattleField[i].setHp(p1BattleField[i].getInitialHp());
 				//p1BattleField[i].getCard().setAtk(p1BattleField[i].getCard().getInitialAtk());
 			}
 			if (p2BattleField[i] != null) {
-				p2BattleField[i].setHp(p2BattleField[i].getCard().getInitialHp());
+				p2BattleField[i].setHp(p2BattleField[i].getInitialHp());
 				//p2BattleField[i].getCard().setAtk(p2BattleField[i].getCard().getInitialAtk());
 			}
 		}
@@ -244,12 +246,12 @@ public class AutoBattlerModel extends Observable {
      * @return returns 0 if the defending champ killed the attacker, 1 if other way around, 
      * and 3 if they both died
      */
-    private int executeAttack(Creature attacker, Creature defender) {
+    private int executeAttack(Card attacker, Card defender) {
     	//TODO set buffs or debuffs?
     	//Something feels wrong here
     	System.out.println(defender.getHp());
     	
-        defender.adjustHp(-attacker.getAtk());
+        defender.loseHp(attacker.getAtk());
         
         System.out.println(defender.getHp());
        
@@ -346,7 +348,7 @@ public class AutoBattlerModel extends Observable {
         if (player.getBattleField()[origin] == null) {
         	return false;
         }
-        Creature temp = player.getBench()[destination];
+        Card temp = player.getBench()[destination];
         player.getBench()[destination] = player.getBattleField()[origin];
         player.getBattleField()[origin] = temp;
         setChanged();
@@ -369,7 +371,7 @@ public class AutoBattlerModel extends Observable {
     	}
         if (player.getBench()[origin] == null)
             return false;
-        Creature temp = player.getBattleField()[destination];
+        Card temp = player.getBattleField()[destination];
         player.getBattleField()[destination] = player.getBench()[origin];
         player.getBench()[origin] = temp;
         setChanged();
@@ -391,14 +393,14 @@ public class AutoBattlerModel extends Observable {
         if (origin[0] == 0) {
             if (player.getBench()[origin[1]] == null && player.getBench()[destination] == null)
                 return false;
-            Creature temp = player.getBench()[origin[1]];
+            Card temp = player.getBench()[origin[1]];
             player.getBench()[origin[1]] = player.getBench()[destination];
             player.getBench()[destination] = temp;
         }
         else {
             if (player.getBattleField()[origin[1]] == null && player.getBattleField()[destination] == null)
                 return false;
-            Creature temp = player.getBattleField()[origin[1]];
+            Card temp = player.getBattleField()[origin[1]];
             player.getBattleField()[origin[1]] = player.getBattleField()[destination];
             player.getBattleField()[destination] = temp;
         }
@@ -426,14 +428,14 @@ public class AutoBattlerModel extends Observable {
 	 */
     public void sellChampion(Player player, int benchOrBattleField, int index) {
     	if (benchOrBattleField == 0) {
-    		Creature toRemove = player.getBench()[index];
+    		Card toRemove = player.getBench()[index];
     		if (toRemove == null) {
     			return;
     		}
     		player.getBench()[index] = null;
     		player.earnGold(toRemove.getPrice());
     	} else if (benchOrBattleField == 1) {
-    		Creature toRemove = player.getBattleField()[index];
+    		Card toRemove = player.getBattleField()[index];
     		if (toRemove == null) {
     			return;
     		}

@@ -13,8 +13,8 @@ import Creatures.Wolf;
  * Also tracks health and gold count.
  */
 public class Player {
-    private final Creature[] battleField;
-    private final Creature[] bench;
+    private final Card[] battleField;
+    private final Card[] bench;
     private int health;
     private int gold;
     private int level;
@@ -26,8 +26,8 @@ public class Player {
      * Initializes battleField array to only allow 7 champions, located by index.
      */
     public Player() {
-        battleField = new Creature[7];
-        bench       = new Creature[7];
+        battleField = new Card[7];
+        bench       = new Card[7];
         health      = 30;
         gold        = 10;
         level 		= 1;
@@ -93,7 +93,7 @@ public class Player {
      * Allows access to player's champions in the bench.
      * @return Arraylist of champions.
      */
-    public Creature[] getBench() {
+    public Card[] getBench() {
         return bench;
     }
     
@@ -147,7 +147,7 @@ public class Player {
      * Allows access to player's champions on the battlefield.
      * @return Array of champions.
      */
-    public Creature[] getBattleField() {
+    public Card[] getBattleField() {
         return battleField;
     }
     
@@ -193,9 +193,9 @@ public class Player {
      * shop if player buys it
      * @param index
      */
-    public Creature buyCharacter(int index) {
+    public Card buyCharacter(int index) {
     	try {
-    		Creature toBuy = shop.getShop()[index];
+    		Card toBuy = shop.getShop()[index];
     		int i = 0;
             while (bench[i] != null)
                 i++;
@@ -209,7 +209,7 @@ public class Player {
         	return toBuy;
     	} catch (Exception ArrayIndexOutOfBoundsException){
     		//not sure what this is yet
-    		return new Wolf();
+    		return null;
     	}
     }
     

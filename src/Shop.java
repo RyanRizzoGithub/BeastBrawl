@@ -7,11 +7,11 @@ import java.util.Random;
 import Creatures.Creature;
 
 public class Shop {
-	private Creature[] shop;
+	private Card[] shop;
 	private Deck deck;
 
 	public Shop() {
-		shop = new Creature[3];
+		shop = new Card[3];
 		deck = new Deck();
 	}
 	
@@ -22,11 +22,11 @@ public class Shop {
 	 * @param level the level of the the current player
 	 * @return
 	 */
-	public Creature[] getShop() {
+	public Card[] getShop() {
 		return shop;
 	}
 	
-	public Creature[] rerollShop(int level) {
+	public Card[] rerollShop(int level) {
 		//TODO this may be incorrect/ we should change to what we want
 		shop = deck.drawShop(level);
 		return shop;
@@ -41,7 +41,7 @@ public class Shop {
 	 */
 	//TODO the shop needs to be fixed according to us
 	private void createShop(int round) {
-		Creature[] newShop = new Creature[3];
+		Card[] newShop = new Card[3];
 		newShop = deck.drawShop(round);
 		shop = newShop;
 	}

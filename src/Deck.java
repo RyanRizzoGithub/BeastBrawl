@@ -96,50 +96,50 @@ public class Deck {
 		deck[HORSE]		= new Horse();
 	}
 	
-	public Creature[] drawShop(int round) {
+	public Card[] drawShop(int round) {
 		Random rand = new Random(); 
 		// If round 1, choose 3 creatures at most 1 cost
 		if (round == 1) {
-			Creature[] selection = new Creature[3];
+			Card[] selection = new Card[3];
 			for (int i=0; i<3; i++) {
 				int creature = rand.nextInt(4);
-				selection[i] = deck[creature];
+				selection[i] = deck[creature].getCard();
 			}
 			return selection;
 		} 
 		// If round 2, choose 4 creatures at most 2 cost
 		if (round == 2) {
-			Creature[] selection = new Creature[4];
+			Card[] selection = new Card[4];
 			for (int i=0; i<4; i++) {
 				int creature = rand.nextInt(9);
-				selection[i] = deck[creature];
+				selection[i] = deck[creature].getCard();
 			}
 			return selection;
 		} 
 		// If round 3, choose 5 creatures at most 3 cost
 		if (round == 3) {
-			Creature[] selection = new Creature[5];
+			Card[] selection = new Card[5];
 			for (int i=0; i<5; i++) {
 				int creature = rand.nextInt(14);
-				selection[i] = deck[creature];
+				selection[i] = deck[creature].getCard();
 			}
 			return selection;
 		} 
 		// If round 4, choose 6 creatures at most 4 cost
 		if (round == 4) {
-			Creature[] selection = new Creature[6];
+			Card[] selection = new Card[6];
 			for (int i=0; i<6; i++) {
 				int creature = rand.nextInt(19);
-				selection[i] = deck[creature];
+				selection[i] = deck[creature].getCard();
 			}
 			return selection;
 		} 
 		// If round 5 or higher, choose 8 creatures at any cost
 		else {
-			Creature[] selection = new Creature[8];
+			Card[] selection = new Card[8];
 			for (int i=0; i<8; i++) {
 				int creature = rand.nextInt(24);
-				selection[i] = deck[creature];
+				selection[i] = deck[creature].getCard();
 			}
 			return selection;
 		}

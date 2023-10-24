@@ -53,7 +53,7 @@ public class AI {
 		// If this is an easy difficulty ai
 		if (difficulty == 1) {
 			// Create a shop selection
-			Creature[] selection = deck.drawShop(round);
+			Card[] selection = deck.drawShop(round);
 			
 			// Buy the best card in the shop (based on hp + atk)
 			Creature bestBuy = selection[0];

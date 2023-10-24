@@ -3,7 +3,7 @@ package src;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import Creatures.Creature;
+import src.cards.*;
 
 public class AutoBattlerController{
 	AutoBattlerModel model;
@@ -32,7 +32,7 @@ public class AutoBattlerController{
         model.resetChampStats();
     }
 	
-	public Creature[] getShop(Player player){
+	public Card[] getShop(Player player){
 		return model.getShop(player);
 	}
 	
@@ -68,7 +68,7 @@ public class AutoBattlerController{
 		return res;
 	}
 	 */
-	public Creature[] rerollShop(Player player){
+	public Card[] rerollShop(Player player){
 		return model.rerollShop(player);
 	}
 

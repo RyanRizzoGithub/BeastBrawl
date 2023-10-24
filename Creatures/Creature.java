@@ -23,8 +23,6 @@ public class Creature {
 	
 	public boolean isDead() { return isDead; }
 	
-	public void setHp(int inital) {hp = inital;}
-	
 	public Card getCard() {
 		Card card = new Card();
 		card.setName("Empty");

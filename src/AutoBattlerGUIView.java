@@ -9,6 +9,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import Creatures.Creature;
+import src.cards.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -89,7 +90,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		timer.setTextFill(Color.BLACK);
 		Timer timer1 = new Timer();
 		TimerTask task = new TimerTask() {
-			int seconds = 30;
+			int seconds = 10;
 			int i = 0;
 
 			@Override
@@ -341,9 +342,9 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	}
 
 	// needs to take champ class card
-	private StackPane createCard(Creature champ) {
+	private StackPane createCard(Card champ) {
 			//gets base card pic?
-			String cardName = ("/assets/" + champ.getCard().getName().toLowerCase() + "Card.png");
+			String cardName = ("/assets/" + champ.getName().toLowerCase() + "Card.png");
 			Image emptyCard = new Image(cardName);
 			ImageView pic = new ImageView();
 			pic.setPreserveRatio(true);
@@ -383,7 +384,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		shop = new VBox(8);
 		controller.startShopPhase();
 		Player player = controller.getP1();
-		Creature[] shopArray = controller.getShop(player);
+		Card[] shopArray = controller.getShop(player);
 
 		cardsForSale = createChampSlots();
 		for (int index = 0; index < shopArray.length; index++) {
@@ -483,22 +484,22 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	public void update(Observable o, Object arg) {
 		// should add if arg is player 1
 		Player p1 = controller.getP1();
-		Creature[] champSlots = p1.getBattleField();
+		Card[] champSlots = p1.getBattleField();
 		remakeHbox(bottomChampions, champSlots);
 
-		Creature[] bench = p1.getBench();
+		Card[] bench = p1.getBench();
 		remakeHbox(bottomBench, bench);
 		changeStats(1);
 		FlowPane fPane = (FlowPane) bottomPlayer.getChildren().get(1);
 		if (!attackPhase) {
-			Creature[] shopCards = controller.getShop(p1);
+			Card[] shopCards = controller.getShop(p1);
 
 			remakeHbox(cardsForSale, shopCards);
 				
 		}else {
 
 			Player p2 = controller.getP2();
-			Creature[] champSlots2 = p2.getBattleField();
+			Card[] champSlots2 = p2.getBattleField();
 			remakeHbox(topChampions, champSlots2);
 			changeStats(2);
 
@@ -511,7 +512,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 
 	}
 
-	private void remakeHbox(HBox cardArea, Creature[] champSlots) {
+	private void remakeHbox(HBox cardArea, Card[] champSlots) {
 
 		for (Node node : cardArea.getChildren()) {
 			StackPane pane = (StackPane) node;
