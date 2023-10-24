@@ -249,11 +249,11 @@ public class AutoBattlerModel extends Observable {
     private int executeAttack(Card attacker, Card defender) {
     	//TODO set buffs or debuffs?
     	//Something feels wrong here
-    	System.out.println(defender.getHp());
+    	//System.out.println(defender.getHp());
     	
         defender.loseHp(attacker.getAtk());
         
-        System.out.println(defender.getHp());
+       // System.out.println(defender.getHp());
        
        // attacker.loseHp(defender.getAtk());
         // both defending and attacking champ die

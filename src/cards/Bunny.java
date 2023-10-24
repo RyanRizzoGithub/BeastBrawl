@@ -39,6 +39,7 @@ public class Bunny {
 	public boolean isDead() {
 		return this.isDead;
 	}
+	
 }
 
 
