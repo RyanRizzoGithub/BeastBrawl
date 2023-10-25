@@ -3,6 +3,7 @@ package src;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Timer;
@@ -35,18 +36,24 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	private BorderPane gameBoard;
 	private VBox topPlayer;
 	private VBox bottomPlayer;
-	private HBox topChampions;
-	private HBox bottomChampions;
-	private HBox cardsForSale;
-	private HBox bottomBench;
-	private HBox topBench;
+	private CardFieldUI topChampions;
+	private CardFieldUI bottomChampions;
+	private CardFieldUI cardsForSale;
+	private CardFieldUI bottomBench;
+	private CardFieldUI topBench;
 	private VBox shop;
 	private Pair[] moveCards;
+	private Pair[] moveCardsClicked;
 	private StackPane topStats;
 	private StackPane bottomStats;
 	private Label timer;
 	private int time;
 	private boolean attackPhase;
+	private double startX;
+	private double startY;
+	private int startingIndex;
+	private int startingFieldIndex;
+	private ArrayList<CardFieldUI> cardFieldList;
 
 	public AutoBattlerGUIView() {
 		model = new AutoBattlerModel();
@@ -54,6 +61,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		controller = new AutoBattlerController(model);
 		gameBoard = new BorderPane();
 		moveCards = new Pair[2];
+		moveCardsClicked = new Pair[2];
 		attackPhase = false;
 	}
 
@@ -68,6 +76,13 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		createBottomPlayer();
 		createTopPlayer();
 		createShop();
+		// adds fields to list in the order they appear to the player
+		cardFieldList = new ArrayList<CardFieldUI>();
+		cardFieldList.add(bottomBench);
+		cardFieldList.add(bottomChampions);
+		cardFieldList.add(topChampions);
+		cardFieldList.add(topBench);
+		cardFieldList.add(cardsForSale);
 
 		gameBoard.setTop(shop);
 		gameBoard.setBottom(bottomPlayer);
@@ -139,14 +154,15 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	 * of card it is just added to stackpane
 	 */
 	private void createTopChamp() {
-		topChampions = createChampSlots();
-		topChampions.setOnMouseClicked((event) -> {
+		topChampions=new CardFieldUI("topChampions",1);
+		topChampions.box = createChampSlots();
+		topChampions.box.setOnMouseClicked((event) -> {
 			int childIndex = findChild(event.getX());
 			if (moveCards[0] == null) {
-				Pair pair = new Pair(topChampions, 1, childIndex);
+				Pair pair = new Pair(topChampions.box, 1, childIndex);
 				moveCards[0] = pair;
 			} else {
-				Pair pair = new Pair(topChampions, 1, childIndex);
+				Pair pair = new Pair(topChampions.box, 1, childIndex);
 				moveCards[1] = pair;
 				controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
 				moveCards = new Pair[2];
@@ -161,20 +177,45 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	 * on top of card it is just added to stackpane
 	 */
 	private void createBottomChamp() {
-		bottomChampions = createChampSlots();
-		bottomChampions.setOnMouseClicked((event) -> {
+		bottomChampions=new CardFieldUI("bottomChamp",1);
+		bottomChampions.box = createChampSlots();
+		// saves card when pressed so they can be dragged
+		bottomChampions.box.setOnMousePressed((event) -> {
 			int childIndex = findChild(event.getX());
 			if (moveCards[0] == null) {
-				Pair pair = new Pair(bottomChampions, 1, childIndex);
+				Pair pair = new Pair(bottomChampions.box, 1, childIndex);
 				moveCards[0] = pair;
+				startingIndex = findChild(event.getX());
+				startingFieldIndex=1;
 			} else {
-				Pair pair = new Pair(bottomChampions, 1, childIndex);
+				Pair pair = new Pair(bottomChampions.box, 1, childIndex);
 				moveCards[1] = pair;
 				controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
 				moveCards = new Pair[2];
+		
 			}
 
 		});
+		// moves by clicking
+		bottomChampions.box.setOnMouseClicked((event) -> {
+			int childIndex = findChild(event.getX());
+			if (moveCardsClicked[0] == null) {
+				
+				
+				Pair pair = new Pair(bottomChampions.box, 1, childIndex);
+				moveCardsClicked[0] = pair;
+				//s//tartingIndex = findChild(event.getX());
+				//startingFieldIndex=1;
+			} else {
+				
+				Pair pair = new Pair(bottomChampions.box, 1, childIndex);
+				moveCardsClicked[1] = pair;
+				controller.changePosition(moveCardsClicked[0].indices, 1, moveCardsClicked[1].indices);				
+				moveCardsClicked = new Pair[2];
+			}
+
+		});
+		
 	}
 
 	/**
@@ -258,6 +299,62 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		return -1;
 
 	}
+	/**
+	 * Finds the index of a field in regards to cardFieldList.
+	 * It does this by getting the y value of where the user clicked on 
+	 * the screen. Then it determines which field the user is in and 
+	 * returns the index of that field. For example the bottomBench field 
+	 * would be index 0 as its on the bottom of the players view.
+	 * 
+	 * @param click, double that is the y-coordinate of where user clicked
+	 * @return index, int that is the index of what field was clicked.
+	 */
+	private int findField(double click) {
+		int index = findFieldHelper(click);
+		
+		if(index>=1) {
+			index-=1;
+		}
+		return index;
+	}
+	
+	/**
+	 * Finds the index of a field a card is dropped on
+	 * 
+	 * @param click, double that is the y-coordinate of where user clicked
+	 * @return index, int that is the index of what field a card was dropped on.
+	 */
+	private int findDroppedField(double click,CardFieldUI draggedFromField) {
+		int getDragggedFieldIndex = GetFeildIndex(draggedFromField);
+		return getDragggedFieldIndex+findField(click);
+	}
+	
+	/**
+	 * Helper function that calculates the index of a field based on double 
+	 * representing where the user clicked in the y direction.
+	 * 
+	 * @param click, double that is the y-coordinate of where user clicked
+	 * @return index, int that is the index of what field was clicked.
+	 */
+	private int findFieldHelper(double click) {
+		double start = 0;
+		double end = 125;
+		click = Math.abs(click);
+		for (int index = 0; index < 7; index++) {
+			if (click >= start && click <= end) {
+				return index;
+			}
+			start += 130;
+			end += 130;
+		}
+		
+		return -1;
+
+	}
+	
+	private int GetFeildIndex(CardFieldUI fieldToFInd) {
+		return cardFieldList.indexOf(fieldToFInd);
+	}
 
 	/**
 	 * helper method that creates the to player slot and creates the top player
@@ -265,15 +362,16 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	 */
 	private void createTopPlayer() {
 		topPlayer = new VBox(10);
-		topBench = createBench();
-		topBench.setAlignment(Pos.CENTER);
-		topBench.setOnMouseClicked((event) -> {
+		topBench = new CardFieldUI("topBench",0);
+		topBench.box = createBench();
+		topBench.box.setAlignment(Pos.CENTER);
+		topBench.box.setOnMouseClicked((event) -> {
 			int childIndex = findChild(event.getX());
 			if (moveCards[0] == null) {
-				Pair pair = new Pair(topBench, 0, childIndex);
+				Pair pair = new Pair(topBench.box, 0, childIndex);
 				moveCards[0] = pair;
 			} else {
-				Pair pair = new Pair(topBench, 0, childIndex);
+				Pair pair = new Pair(topBench.box, 0, childIndex);
 				moveCards[1] = pair;
 				controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
 				moveCards = new Pair[2];
@@ -282,7 +380,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 
 		topStats = createPlayerArea(controller.getP2());
 
-		topPlayer.getChildren().addAll(topBench, playerAndItems(topStats), topChampions);
+		topPlayer.getChildren().addAll(topBench.box, playerAndItems(topStats), topChampions.box);
 
 	}
 
@@ -292,24 +390,44 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	 */
 	private void createBottomPlayer() {
 		bottomPlayer = new VBox(10);
-		bottomBench = createBench();
-		bottomBench.setAlignment(Pos.CENTER);
-		bottomBench.setOnMouseClicked((event) -> {
+		bottomBench=new CardFieldUI("bottomBench",0);
+		bottomBench.box = createBench();
+		bottomBench.box.setAlignment(Pos.CENTER);
+		// saves card when pressed so they can be dragged
+		bottomBench.box.setOnMousePressed((event) -> {
+			// saves card when pressed
 			int childIndex = findChild(event.getX());
-			if (moveCards[0] == null) {
-				Pair pair = new Pair(bottomBench, 0, childIndex);
+			if (moveCards[0] == null) {	
+				Pair pair = new Pair(bottomBench.box, 0, childIndex);
 				moveCards[0] = pair;
+				startingIndex = childIndex;
+				startingFieldIndex=0;
 			} else {
-				Pair pair = new Pair(bottomBench, 0, childIndex);
+				Pair pair = new Pair(bottomBench.box, 0, childIndex);
 				moveCards[1] = pair;
 				controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
 				moveCards = new Pair[2];
 			}
 		});
-
+		bottomBench.box.setOnMouseClicked((event) -> {
+			// saves card when pressed
+			int childIndex = findChild(event.getX());
+			if (moveCards[0] == null) {	
+				Pair pair = new Pair(bottomBench.box, 0, childIndex);
+				moveCards[0] = pair;
+				//startingIndex = childIndex;
+				//startingFieldIndex=0;
+			} else {
+				Pair pair = new Pair(bottomBench.box, 0, childIndex);
+				moveCards[1] = pair;
+				controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
+				moveCards = new Pair[2];
+			}
+		});
 		bottomStats = createPlayerArea(controller.getP1());
-
-		bottomPlayer.getChildren().addAll(bottomChampions, playerAndItems(bottomStats), bottomBench);
+		FlowPane bottomCards =playerAndItems(bottomStats);
+		bottomPlayer.getChildren().addAll(bottomChampions.box, bottomCards, bottomBench.box);
+		
 
 	}
 
@@ -385,21 +503,21 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		controller.startShopPhase();
 		Player player = controller.getP1();
 		Card[] shopArray = controller.getShop(player);
-
-		cardsForSale = createChampSlots();
+		cardsForSale = new CardFieldUI("cardsForSale",1);
+		cardsForSale.box = createChampSlots();
 		for (int index = 0; index < shopArray.length; index++) {
 			StackPane card = createCard(shopArray[index]);
-			StackPane emptySlot = (StackPane) cardsForSale.getChildren().get(index);
+			StackPane emptySlot = (StackPane) cardsForSale.box.getChildren().get(index);
 			emptySlot.getChildren().add(card);
 		}
 		// TODO fix this for sure
-		cardsForSale.setOnMouseClicked((event) -> {
+		cardsForSale.box.setOnMouseClicked((event) -> {
 			int childIndex = findChild(event.getX());
 			Player p1 = controller.getP1();
 			controller.buyCharacter(p1, childIndex);
-			Pair playerCards = new Pair(bottomBench, 0, findEmptySpot(bottomBench));
+			Pair playerCards = new Pair(bottomBench.box, 0, findEmptySpot(bottomBench.box));
 			moveCards[1] = playerCards;
-			Pair shopCards = new Pair(cardsForSale, 1, childIndex);
+			Pair shopCards = new Pair(cardsForSale.box, 1, childIndex);
 			moveCards[0] = shopCards;
 			controller.changePosition(moveCards[0].indices, 2, moveCards[1].indices);
 			moveCards = new Pair[2];
@@ -415,7 +533,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 				moveCards = new Pair[2];
 			}
 		});
-		shop.getChildren().addAll(sellArea, shopArea, cardsForSale);
+		shop.getChildren().addAll(sellArea, shopArea, cardsForSale.box);
 
 
 		// get model shop and read array characters
@@ -512,9 +630,9 @@ public class AutoBattlerGUIView extends Application implements Observer {
 
 	}
 
-	private void remakeHbox(HBox cardArea, Card[] champSlots) {
+	private void remakeHbox(CardFieldUI cardArea, Card[] champSlots) {
 
-		for (Node node : cardArea.getChildren()) {
+		for (Node node : cardArea.box.getChildren()) {
 			StackPane pane = (StackPane) node;
 			if (pane.getChildren().size() > 1) {
 				pane.getChildren().remove(1);
@@ -525,8 +643,46 @@ public class AutoBattlerGUIView extends Application implements Observer {
 				continue;
 			} else {
 				StackPane card = createCard(champSlots[index]);
-				StackPane slot = (StackPane) cardArea.getChildren().get(index);
+				StackPane slot = (StackPane) cardArea.box.getChildren().get(index);
 				slot.getChildren().add(card);
+				// allows cards to moved when pressed
+				card.setOnMousePressed(e->{
+					// saves cards current position when pressed
+					int childIndex = findChild(e.getX());
+					startX = e.getSceneX()-card.getTranslateX();
+					startY = e.getSceneY()-card.getTranslateY();
+					
+				});
+				// allows card to follow mouse as dragged
+				card.setOnMouseDragged(e->{ 
+					// moves card to mouse
+					card.setTranslateX(e.getSceneX()-startX);
+					card.setTranslateY(e.getSceneY()-startY);
+					
+				});
+				// mouse is done dragging
+				cardArea.box.setOnMouseReleased((event)->{
+					
+					if(moveCards[0]!=null) {
+						// gets index of the mouse is over
+						int childIndex = findChild(event.getX());
+						// gets the index of the field the mouse is over
+						int fieldIndex=findDroppedField(event.getY(),cardArea);
+						// gets field the mouse is over
+						CardFieldUI fieldDroppedOn = cardFieldList.get(fieldIndex);
+						System.out.println(fieldIndex+"  "+event.getY());
+						// saves the card and the position of what the mouse was over when released
+						Pair pair = new Pair(fieldDroppedOn.box, fieldIndex, childIndex);
+						moveCards[1] = pair;
+						// swaps
+						controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
+						moveCards = new Pair[2];
+						
+					}
+						
+				});
+				
+				
 			}
 		}
 	}
