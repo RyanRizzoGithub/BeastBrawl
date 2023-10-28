@@ -1,33 +1,32 @@
 package src;
 
 import java.util.Random;
-
-import Creatures.Bear;
-import Creatures.Boar;
-import Creatures.Bull;
-import Creatures.Bunny;
-import Creatures.Cat;
-import Creatures.Chicken;
-import Creatures.Cow;
-import Creatures.Creature;
-import Creatures.Deer;
-import Creatures.Dog;
-import Creatures.Donkey;
-import Creatures.Mouse;
-import Creatures.Owl;
-import Creatures.Pig;
-import Creatures.Sheep;
-import Creatures.Snake;
-import Creatures.Squirrel;
-import Creatures.Tiger;
-import Creatures.Turtle;
-import Creatures.Wolf;
-import Creatures.Duck;
-import Creatures.Fox;
-import Creatures.Frog;
-import Creatures.Goat;
-import Creatures.Horse;
-import Creatures.Monkey;
+import src.Creatures.Bear;
+import src.Creatures.Boar;
+import src.Creatures.Bull;
+import src.Creatures.Bunny;
+import src.Creatures.Cat;
+import src.Creatures.Chicken;
+import src.Creatures.Cow;
+import src.Creatures.Creature;
+import src.Creatures.Deer;
+import src.Creatures.Dog;
+import src.Creatures.Donkey;
+import src.Creatures.Mouse;
+import src.Creatures.Owl;
+import src.Creatures.Pig;
+import src.Creatures.Sheep;
+import src.Creatures.Snake;
+import src.Creatures.Squirrel;
+import src.Creatures.Tiger;
+import src.Creatures.Turtle;
+import src.Creatures.Wolf;
+import src.Creatures.Duck;
+import src.Creatures.Fox;
+import src.Creatures.Frog;
+import src.Creatures.Goat;
+import src.Creatures.Horse;
+import src.Creatures.Monkey;
 
 public class Deck {
 	// 1 Cost card index declarations
@@ -96,50 +95,50 @@ public class Deck {
 		deck[HORSE]		= new Horse();
 	}
 	
-	public Card[] drawShop(int round) {
+	public Creature[] drawShop(int round) {
 		Random rand = new Random(); 
 		// If round 1, choose 3 creatures at most 1 cost
 		if (round == 1) {
-			Card[] selection = new Card[3];
+			Creature[] selection = new Creature[3];
 			for (int i=0; i<3; i++) {
 				int creature = rand.nextInt(4);
-				selection[i] = deck[creature].getCard();
+				selection[i] = deck[creature];
 			}
 			return selection;
 		} 
 		// If round 2, choose 4 creatures at most 2 cost
 		if (round == 2) {
-			Card[] selection = new Card[4];
+			Creature[] selection = new Creature[4];
 			for (int i=0; i<4; i++) {
 				int creature = rand.nextInt(9);
-				selection[i] = deck[creature].getCard();
+				selection[i] = deck[creature];
 			}
 			return selection;
 		} 
 		// If round 3, choose 5 creatures at most 3 cost
 		if (round == 3) {
-			Card[] selection = new Card[5];
+			Creature[] selection = new Creature[5];
 			for (int i=0; i<5; i++) {
 				int creature = rand.nextInt(14);
-				selection[i] = deck[creature].getCard();
+				selection[i] = deck[creature];
 			}
 			return selection;
 		} 
 		// If round 4, choose 6 creatures at most 4 cost
 		if (round == 4) {
-			Card[] selection = new Card[6];
+			Creature[] selection = new Creature[6];
 			for (int i=0; i<6; i++) {
 				int creature = rand.nextInt(19);
-				selection[i] = deck[creature].getCard();
+				selection[i] = deck[creature];
 			}
 			return selection;
 		} 
 		// If round 5 or higher, choose 8 creatures at any cost
 		else {
-			Card[] selection = new Card[8];
+			Creature[] selection = new Creature[8];
 			for (int i=0; i<8; i++) {
 				int creature = rand.nextInt(24);
-				selection[i] = deck[creature].getCard();
+				selection[i] = deck[creature];
 			}
 			return selection;
 		}

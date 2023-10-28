@@ -1,8 +1,10 @@
 package src;
 
 /**
- * Abstract class that all out other "cards" will be based on. Features hp, atk,
+ * Abstract class that all out other "Champion" will be based on. Features hp, atk,
  * name, and type.
+ * 
+ * @author abisg
  *
  */
 public class Card {
