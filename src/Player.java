@@ -4,49 +4,34 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import Creatures.Creature;
-import Creatures.Wolf;
-
 /**
  * Creates a player object that hasA battleField and bench that contain all the champions
  *      owned by the player.
  * Also tracks health and gold count.
  */
 public class Player {
-    private final Card[] battleField;
-    private final Card[] bench;
+    private final Champion[] battleField;
+    private final Champion[] bench;
     private int health;
     private int gold;
     private int level;
-    private Shop shop;
-    private int attacking_card;
+    //private Shop shop;
+    private Item[] items;
+    private int itemCount;
 
     /**
      * Creates player object with default stats and zero champions.
      * Initializes battleField array to only allow 7 champions, located by index.
      */
     public Player() {
-        battleField = new Card[7];
-        bench       = new Card[7];
+        battleField = new Champion[7];
+        bench       = new Champion[7];
         health      = 30;
         gold        = 10;
         level 		= 1;
-        shop 		= new Shop();
-        attacking_card  	= 0;
-    }
-    
-    /*
-     * Used to set which card in player deck is attacking first
-     */
-    public void set_attack_card(int position) {
-    	attacking_card = position;
-    }
-    
-    /*
-     * Used to get which card in player deck should be attacking first
-     */
-    public int get_attack_card() {
-    	return attacking_card;
+       // shop 		= new Shop();
+        items 		= new Item[6];
+        itemCount  	= 0;
     }
 
     /**
@@ -93,7 +78,7 @@ public class Player {
      * Allows access to player's champions in the bench.
      * @return Arraylist of champions.
      */
-    public Card[] getBench() {
+    public Champion[] getBench() {
         return bench;
     }
     
@@ -101,7 +86,7 @@ public class Player {
      * Returns all traits on the battlefield regardless of if they give the 
      * trait bonus or not
      * @return a hashmap containing all the traits and how many there are
-     
+     */
     public HashMap<String, Integer> getTraits() {
     	HashMap<String, Integer> map = new HashMap<>();
     	ArrayList<String> namesAlreadyAdded = new ArrayList<String>();
@@ -123,12 +108,12 @@ public class Player {
     		}
     	}
     	return map;
-    } 
+    }
     
     /**
      * Returns all the traits that can give bonuses on the board
      * @return a hashmap containing all the traits and how many there are
-     
+     */
     public HashMap<String, Integer> getActiveTraits(){
     	HashMap<String, Integer> map = getTraits();
     	HashMap<String, Integer> newMap = new HashMap<>();
@@ -142,12 +127,12 @@ public class Player {
     	}
 		return newMap;
     }
-    */
+    
     /**
      * Allows access to player's champions on the battlefield.
      * @return Array of champions.
      */
-    public Card[] getBattleField() {
+    public Champion[] getBattleField() {
         return battleField;
     }
     
@@ -184,33 +169,90 @@ public class Player {
      * Gets the shop that the player is using
      * @return
      */
-    public Shop getShop() {
-    	return shop;
-    }
+   // public Shop getShop() {
+   // 	return shop;
+   // }
     
     /**
      * Buys the character denoted by the index in the shop, removes champion from
      * shop if player buys it
      * @param index
-     */
-    public Card buyCharacter(int index) {
+     
+    public Champion buyCharacter(int index) {
     	try {
-    		Card toBuy = shop.getShop()[index];
+    		Champion toBuy = shop.getShop()[index];
     		int i = 0;
             while (bench[i] != null)
                 i++;
         	if (i <= 7 && toBuy != null) {
-        		if (gold >= toBuy.getPrice()) {
+        		if (gold >= toBuy.getStars()) {
         			bench[i] = toBuy;
-        			spendGold(toBuy.getPrice());
+        			spendGold(toBuy.getStars());
         			shop.getShop()[index] = null;
         		}
         	}
         	return toBuy;
     	} catch (Exception ArrayIndexOutOfBoundsException){
-    		//not sure what this is yet
-    		return null;
+    		return new Champion() {
+                //this aint right chief
+            };
     	}
+    }
+*/
+    /**
+     * returns the items the player has
+     * @return an ArrayList of Items
+     */
+    public Item[] getItems() {
+    	return items;
+    }
+
+    /**
+     * adds the item to the pool of the players items
+     * @param item
+     */
+    public void addItem(Item item) {
+    	if (itemCount >= 6) {
+    		return;
+    	}
+    	items[itemCount] = item;
+    	itemCount += 1;
+    }
+
+    /**
+     * Places the item on the champion, removes that item from the list
+     * @param item
+     * @param champion
+     */
+    public void useItem(Item item, Champion champion) {
+    	if (item == null || champion == null) {
+    		return;
+    	}
+    	String itemType = item.getType();
+    	System.out.println(champion.getName());
+    	if (champion.getWeaponType().equals(itemType)) {
+    		System.out.println("first");
+    		if (item.getRarity() == 1) {
+    			item.setAtk(2);
+    		}
+    		if (item.getRarity() == 2) {
+    			item.setAtk(4);
+    		}
+    		if (item.getRarity() == 3) {
+    			item.setAtk(6);
+    		}
+        	champion.addItem(item);
+        	for (int i = 0; i < 6; i++) {
+        		if (items[i].equals(item)) {
+        			items[i] = null;
+        		}
+        	}
+        	itemCount -= 1;
+    	}
+    }
+    
+    public int getItemCount() {
+    	return itemCount;
     }
     
 }
