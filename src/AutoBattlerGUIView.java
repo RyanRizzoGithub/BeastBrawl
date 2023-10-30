@@ -44,7 +44,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	private Pair[] moveCards;
 	private StackPane topStats;
 	private StackPane bottomStats;
-	private Label timer;
+	private Button turnButton;
 	private int time;
 	private boolean attackPhase;
 
@@ -86,33 +86,16 @@ public class AutoBattlerGUIView extends Application implements Observer {
 
 
 	public void startGame() {
-		timer = new Label("");
-		timer.setTextFill(Color.BLACK);
-		Timer timer1 = new Timer();
-		TimerTask task = new TimerTask() {
-			int seconds = 10;
-			int i = 0;
+	    turnButton = new Button();
+	    turnButton.setText("end turn");
+	    turnButton.setTextFill(Color.BLACK);
 
-			@Override
-			public void run() {
-				i++;
-				if (i % seconds == 0) {
-					// start attack phase
-					
-					timer1.cancel();
-					attackPhase = true;
-					Platform.runLater(() -> attackStart());
-					
-
-				} else {
-					time = (seconds - (i % seconds));
-					Platform.runLater(() -> timer.setText("TIMER: " + time));
-				}
-
-			}
-		};
-
-		timer1.schedule(task, 0, 1000);
+		turnButton.setOnMouseClicked((event) -> {
+			// start attack phase
+			attackPhase = true;
+			Platform.runLater(() -> attackStart());
+			
+		});
 
 	}
 
@@ -464,7 +447,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		viewUpgrade.setPreserveRatio(true);
 		viewUpgrade.setFitHeight(50);
 		playerArea.getChildren().add(viewUpgrade);
-		playerArea.getChildren().add(timer);
+		playerArea.getChildren().add(turnButton);
 		playerArea.setAlignment(Pos.CENTER);
 		// upgrade handler
 		// TODO leveling up rerolls shop

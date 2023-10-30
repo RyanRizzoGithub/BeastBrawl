@@ -56,7 +56,7 @@ public class AI {
 			Card[] selection = deck.drawShop(round);
 			
 			// Buy the best card in the shop (based on hp + atk)
-			Creature bestBuy = selection[0];
+			Card bestBuy = selection[0];
 			for (int i=0; i<selection.length; i++) {
 				if (selection[i].getHp() + selection[i].getAtk() > 
 				bestBuy.getHp() + bestBuy.getAtk()) {
