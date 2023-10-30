@@ -2,7 +2,6 @@ package src;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 import src.cards.*;
 
@@ -33,7 +32,7 @@ public class AutoBattlerController{
         model.resetChampStats();
     }
 	
-	public LinkedList<Card> getShop(Player player){
+	public Card[] getShop(Player player){
 		return model.getShop(player);
 	}
 	
@@ -69,7 +68,7 @@ public class AutoBattlerController{
 		return res;
 	}
 	 */
-	public LinkedList<Card> rerollShop(Player player){
+	public Card[] rerollShop(Player player){
 		return model.rerollShop(player);
 	}
 
@@ -123,6 +122,5 @@ public class AutoBattlerController{
 		return false;
 	}
 }
-
 
 

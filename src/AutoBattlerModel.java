@@ -3,7 +3,6 @@ package src;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Random;
 
@@ -89,10 +88,10 @@ public class AutoBattlerModel extends Observable {
     	// the i might be wrong here?
     	int sum = 0;
     	for(int i = 0; i < 6; i++) {
-    		if(winner.getBoard().get(i) == null) {
+    		if(winner.getBattleField()[i] == null) {
     			continue;
     		}else {
-    			sum += winner.getBoard().get(i).getPrice();
+    			sum += winner.getBattleField()[i].getPrice();
     		}
     	}
     	return sum;
@@ -134,7 +133,7 @@ public class AutoBattlerModel extends Observable {
      * @param player the player whos shop is chosen
      * @return
      */
-    public LinkedList<Card> getShop(Player player){
+    public Card[] getShop(Player player){
     	return player.getShop().getShop();
     }
    
@@ -144,12 +143,12 @@ public class AutoBattlerModel extends Observable {
      * @param player the player who wants to re-roll
      * @return
      */
-    public LinkedList<Card> rerollShop(Player player){
+    public Card[] rerollShop(Player player){
     	if (player.getGold() > 0) {
     		player.spendGold(1);
     		setChanged();
         	notifyObservers(player);
-    		player.getShop().rollShop();
+        	player.getShop().rollShop();
     		return player.getShop().getShop();
     	}
     	//if the player doesn't have 1 gold, return the current shop
@@ -186,7 +185,7 @@ public class AutoBattlerModel extends Observable {
         Card defender = null;
         //while loop finds current attacker or next available attacker.
         while (attacker == null || attacker.getHp() <= 0) {
-            attacker = attacking.getBoard().get(i);
+            attacker = attacking.getBattleField()[i];
             if (i > 5)
                 i = 0;
             else
@@ -198,10 +197,10 @@ public class AutoBattlerModel extends Observable {
         while (defender == null || defender.getHp() <= 0) {
             j = rng.nextInt(7);
             //rng keeps choosing a random number until it can find a not empty slot
-            while(defending.getBoard().get(j) == null) {
+            while(defending.getBattleField()[j] == null) {
             	j = rng.nextInt(7);
             }
-            defender = defending.getBoard().get(j);
+            defender = defending.getBattleField()[j];
         }
         System.out.println("This is the defender: " + defender.getName());
         int result = executeAttack(attacker, defender);
@@ -222,15 +221,15 @@ public class AutoBattlerModel extends Observable {
      */
     public void resetChampStats() {
     	//something aint right here
-    		LinkedList<Card> p1BattleField = p1.getBoard();
-    		LinkedList<Card> p2BattleField = p2.getBoard();
-		for (int i = 0; i < p1BattleField.size(); i++) {
-			if (p1BattleField.get(i) != null) {
-				p1BattleField.get(i).setHp(p1BattleField.get(i).getInitialHp());
+    		Card[] p1BattleField = p1.getBattleField();
+    		Card[] p2BattleField = p2.getBattleField();
+		for (int i = 0; i < 7; i++) {
+			if (p1BattleField[i] != null) {
+				p1BattleField[i].setHp(p1BattleField[i].getInitialHp());
 				//p1BattleField[i].getCard().setAtk(p1BattleField[i].getCard().getInitialAtk());
 			}
-			if (p2BattleField.get(i) != null) {
-				p2BattleField.get(i).setHp(p2BattleField.get(i).getInitialHp());
+			if (p2BattleField[i] != null) {
+				p2BattleField[i].setHp(p2BattleField[i].getInitialHp());
 				//p2BattleField[i].getCard().setAtk(p2BattleField[i].getCard().getInitialAtk());
 			}
 		}
@@ -280,18 +279,18 @@ public class AutoBattlerModel extends Observable {
         int p1Alive = 0;
         int p2Alive = 0;
         //if p1 has alive champs, stillAlive == 1
-        for (int i = 0; i < p1.getBoard().size(); i++) {
-        	if(p1.getBoard().get(i) == null) {
+        for (int i = 0; i < 7; i++) {
+        	if(p1.getBattleField()[i] == null) {
         		continue;
         	}
-            if (p1.getBoard().get(i).getHp() > 0)
+            if (p1.getBattleField()[i].getHp() > 0)
                 p1Alive = 1;
         }
-        for (int i = 0; i < p2.getBoard().size(); i++) {
-        	if(p2.getBoard().get(i) == null) {
+        for (int i = 0; i < 7; i++) {
+        	if(p2.getBattleField()[i] == null) {
         		continue;
         	}
-            if (p2.getBoard().get(i).getHp() > 0)
+            if (p2.getBattleField()[i].getHp() > 0)
                 p2Alive = 1;
         } 
         //both alive
@@ -347,12 +346,12 @@ public class AutoBattlerModel extends Observable {
     	if (origin < 0 || destination >= 7 || destination < 0) {
     		return false;
     	}
-        if (player.getBoard().get(origin) == null) {
+        if (player.getBattleField()[origin] == null) {
         	return false;
         }
-        Card temp = player.getBench().get(destination);
-        player.getBench().set(destination, player.getBoard().get(origin));
-        player.getBoard().set(origin, temp);
+        Card temp = player.getBench()[destination];
+        player.getBench()[destination] = player.getBattleField()[origin];
+        player.getBattleField()[origin] = temp;
         setChanged();
     	notifyObservers(player);
         return true;
@@ -371,11 +370,11 @@ public class AutoBattlerModel extends Observable {
     	if (origin < 0 || destination == -1) {
     		return false;
     	}
-        if (player.getBench().get(origin) == null)
+        if (player.getBench()[origin] == null)
             return false;
-        Card temp = player.getBoard().get(destination);
-        player.getBoard().set(destination, player.getBench().get(origin));
-        player.getBench().set(origin, temp);
+        Card temp = player.getBattleField()[destination];
+        player.getBattleField()[destination] = player.getBench()[origin];
+        player.getBench()[origin] = temp;
         setChanged();
     	notifyObservers(player);
         return true;
@@ -393,18 +392,18 @@ public class AutoBattlerModel extends Observable {
     		return false;
     	}
         if (origin[0] == 0) {
-            if (player.getBench().get(origin[1]) == null && player.getBench().get(destination) == null)
+            if (player.getBench()[origin[1]] == null && player.getBench()[destination] == null)
                 return false;
-            Card temp = player.getBench().get(origin[1]);
-            player.getBench().set(origin[1], player.getBench().get(destination));
-            player.getBench().set(destination, temp);
+            Card temp = player.getBench()[origin[1]];
+            player.getBench()[origin[1]] = player.getBench()[destination];
+            player.getBench()[destination] = temp;
         }
         else {
-            if (player.getBoard().get(origin[1]) == null && player.getBoard().get(destination) == null)
+            if (player.getBattleField()[origin[1]] == null && player.getBattleField()[destination] == null)
                 return false;
-            Card temp = player.getBoard().get(origin[1]);
-            player.getBoard().set(origin[1], player.getBoard().get(destination));
-            player.getBoard().set(destination, temp);
+            Card temp = player.getBattleField()[origin[1]];
+            player.getBattleField()[origin[1]] = player.getBattleField()[destination];
+            player.getBattleField()[destination] = temp;
         }
         setChanged();
     	notifyObservers(player);
@@ -418,7 +417,7 @@ public class AutoBattlerModel extends Observable {
      * @return          true if found, false otherwise.
      */
     private boolean isOnBattleField(int location, Player player) {
-        return player.getBoard().get(location) != null;
+        return player.getBattleField()[location] != null;
     }
     
 	/**
@@ -430,18 +429,18 @@ public class AutoBattlerModel extends Observable {
 	 */
     public void sellChampion(Player player, int benchOrBattleField, int index) {
     	if (benchOrBattleField == 0) {
-    		Card toRemove = player.getBench().get(index);
+    		Card toRemove = player.getBench()[index];
     		if (toRemove == null) {
     			return;
     		}
-    		player.getBench().set(index, null);
+    		player.getBench()[index] = null;
     		player.earnGold(toRemove.getPrice());
     	} else if (benchOrBattleField == 1) {
-    		Card toRemove = player.getBoard().get(index);
+    		Card toRemove = player.getBattleField()[index];
     		if (toRemove == null) {
     			return;
     		}
-    		player.getBoard().set(index, null);
+    		player.getBattleField()[index] = null;
     		player.earnGold(toRemove.getPrice());
     	}
     	setChanged();
@@ -467,15 +466,18 @@ public class AutoBattlerModel extends Observable {
     	}
     
     	// if AI has chanpions on bench and spaces on the battlefield
-    	while (p2.getBoard().size() < 7) {
+    	while (p2.getBattleField()[6] == null) {
     		// gets the index of the leftmost champ on the bench
     		int firstChampLocation = getFirstOnBench(p2);
     		//if no champions on bench, breaks
     		if (firstChampLocation == -1) {
     			break;
     		}
-    		int i = p2.getBoard().size();
+    		int i = 0;
     		// puts champion from bench to battlefield at farthest left position
+    		while (p2.getBattleField()[i] != null) {
+    			i += 1;
+    		}
     		benchToBattle(firstChampLocation, p2, i);
     	}
     	setChanged();
@@ -488,8 +490,8 @@ public class AutoBattlerModel extends Observable {
      * @param player
      */
     private int getFirstOnBench(Player player) {
-    	for (int i = 0; i < player.getBench().size(); i++) {
-    		if (player.getBench().get(i) != null) {
+    	for (int i = 0; i < player.getBench().length; i++) {
+    		if (player.getBench()[i] != null) {
     			return i;
     		}
     	}

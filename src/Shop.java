@@ -1,8 +1,4 @@
 package src;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.Random;
 
 import Creatures.Bear;
@@ -67,13 +63,13 @@ public class Shop {
 	public final int BULL		= 22;
 	public final int BOAR		= 23;
 	public final int HORSE		= 24;
-	
-	private LinkedList<Card> shop;
-	public Creature deck[];
+		
+	private Card[] shop;
+	private Creature deck[];
 	private int level;
 
 	public Shop() {
-		shop = new LinkedList<Card>();
+		shop = null;
 		level = 1;
 		
 		deck = new Creature[25];
@@ -103,68 +99,74 @@ public class Shop {
 		deck[BOAR]		= new Boar();
 		deck[HORSE]		= new Horse();
 	}
-
-	public void levelUp() {
-		level++;
-	}
 	
-	public LinkedList<Card> getShop() {
-		return shop;
-	}
+	public void levelUp() { level++; }
 	
-	public void rollShop() {
+	public int getLevel() { return level; }
+	
+	public Card[] getShop() { return shop; }
+	
+	public Card[] rollShop() {
 		Random rand = new Random(); 
-		shop.clear();
-		
 		// If round 1, choose 3 creatures at most 1 cost
 		if (level == 1) {
+			Card[] selection = new Card[3];
 			for (int i=0; i<3; i++) {
 				int creature = rand.nextInt(4);
-				shop.add(deck[creature].getCard());
+				selection[i] = deck[creature].getCard();
 			}
+			shop = selection;
 		} 
 		// If round 2, choose 4 creatures at most 2 cost
-		if (level == 2) {
+		else if (level == 2) {
+			Card[] selection = new Card[4];
 			for (int i=0; i<4; i++) {
 				int creature = rand.nextInt(9);
-				shop.add(deck[creature].getCard());
+				selection[i] = deck[creature].getCard();
 			}
+			shop = selection;
 		} 
 		// If round 3, choose 5 creatures at most 3 cost
-		if (level == 3) {
+		else if (level == 3) {
+			Card[] selection = new Card[5];
 			for (int i=0; i<5; i++) {
 				int creature = rand.nextInt(14);
-				shop.add(deck[creature].getCard());
+				selection[i] = deck[creature].getCard();
 			}
+			shop = selection;
 		} 
 		// If round 4, choose 6 creatures at most 4 cost
-		if (level == 4) {
+		else if (level == 4) {
+			Card[] selection = new Card[6];
 			for (int i=0; i<6; i++) {
 				int creature = rand.nextInt(19);
-				shop.add(deck[creature].getCard());
+				selection[i] = deck[creature].getCard();
 			}
+			shop = selection;
 		} 
 		// If round 5 or higher, choose 8 creatures at any cost
 		else {
+			Card[] selection = new Card[8];
 			for (int i=0; i<8; i++) {
 				int creature = rand.nextInt(24);
-				shop.add(deck[creature].getCard());
+				selection[i] = deck[creature].getCard();
 			}
+			shop = selection;
 		}
+		return shop;
 	}
-	
+		
 	public String toString() {
 		String res = "";
-		for (int i = 0; i < 3; i++) {
-			if (shop.get(i) != null) {
-				res += shop.get(i).getName();
+		for (int i = 0; i < shop.length; i++) {
+			if (shop[i] != null) {
+				res += shop[i].getName();
 				res += " ";
 			}
 		}
 		return res;
 	}
 }
-
 
 
 
