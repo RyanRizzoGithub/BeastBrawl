@@ -1,35 +1,31 @@
 package src;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import Creatures.Creature;
+import src.cards.*;
 import javafx.application.Application;
-import javafx.collections.ObservableList;
+import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.TilePane;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
@@ -42,104 +38,210 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	private VBox bottomPlayer;
 	private HBox topChampions;
 	private HBox bottomChampions;
-	private VBox championsCombined;
+	private HBox cardsForSale;
+	private HBox bottomBench;
+	private HBox topBench;
+	private VBox shop;
 	private Pair[] moveCards;
+	private StackPane topStats;
+	private StackPane bottomStats;
+	private Label timer;
+	private int time;
+	private boolean attackPhase;
 
 	public AutoBattlerGUIView() {
 		model = new AutoBattlerModel();
 		model.addObserver(this);
 		controller = new AutoBattlerController(model);
 		gameBoard = new BorderPane();
-		championsCombined = new VBox(8);
 		moveCards = new Pair[2];
+		attackPhase = false;
 	}
-	
+
 	@Override
 	public void start(Stage stage) throws Exception {
 		stage.setTitle("Genshin Auto Battler");
-		Image background = new Image("/assets/Background.png");
+		Image background = new Image("Background.png");
 		gameBoard.setBackground(new Background(new BackgroundImage(background, null, null, null, null)));
-		createTopPlayer();
-		createBottomPlayer();
+		startGame();
 		createTopChamp();
 		createBottomChamp();
-		championsCombined.getChildren().addAll(topChampions,bottomChampions);
-		gameBoard.setCenter(championsCombined);
-		// window.setCenter(mainBoard());
+		createBottomPlayer();
+		createTopPlayer();
+		createShop();
+
+		gameBoard.setTop(shop);
+		gameBoard.setBottom(bottomPlayer);
+		gameBoard.setMargin(bottomPlayer, new Insets(10,10,10,10));
+		gameBoard.setMargin(shop, new Insets(10,10,10,10));
+
+
+		// if in shop phase make another thing
+
+		// if in shop phase make another thing
 		Scene scene = new Scene(gameBoard);
+		
 		stage.setScene(scene);
 		stage.show();
+	}
+
+
+	public void startGame() {
+		timer = new Label("");
+		timer.setTextFill(Color.BLACK);
+		Timer timer1 = new Timer();
+		TimerTask task = new TimerTask() {
+			int seconds = 10;
+			int i = 0;
+
+			@Override
+			public void run() {
+				i++;
+				if (i % seconds == 0) {
+					// start attack phase
+					
+					timer1.cancel();
+					attackPhase = true;
+					Platform.runLater(() -> attackStart());
+					
+
+				} else {
+					time = (seconds - (i % seconds));
+					Platform.runLater(() -> timer.setText("TIMER: " + time));
+				}
+
+			}
+		};
+
+		timer1.schedule(task, 0, 1000);
+
+	}
+
+	private void attackStart() {
+		gameBoard.setTop(topPlayer);
+		gameBoard.setMargin(topPlayer, new Insets(10,10,10,10));
+		controller.AIturn();
+		//controller.giveTraitBonuses();
+		controller.startAttackPhase();
+		attackPhase = false;
+		
+		controller.resetChampionStats();
+		startGame();
+		createShop();
+		gameBoard.setTop(shop);
+		gameBoard.setMargin(shop, new Insets(10,10,10,10));
 
 	}
 
 	/**
-	 * helper method that creates the top players empty card slots and
-	 * contains an event handler for clicking when players swap cards.
-	 * player cards by default are stackpanes with a transparent rectangle
-	 * and when a card is placed on top of card it is just added to stackpane
+	 * helper method that creates the top players empty card slots and contains an
+	 * event handler for clicking when players swap cards. player cards by default
+	 * are stackpanes with a transparent rectangle and when a card is placed on top
+	 * of card it is just added to stackpane
 	 */
 	private void createTopChamp() {
 		topChampions = createChampSlots();
 		topChampions.setOnMouseClicked((event) -> {
 			int childIndex = findChild(event.getX());
-			if(moveCards[0] == null) {
-				Pair pair = new Pair(topChampions, childIndex);
+			if (moveCards[0] == null) {
+				Pair pair = new Pair(topChampions, 1, childIndex);
 				moveCards[0] = pair;
-			}else {
-				Pair pair = new Pair(topChampions, childIndex);
+			} else {
+				Pair pair = new Pair(topChampions, 1, childIndex);
 				moveCards[1] = pair;
-				swapCards();
+				controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
+				moveCards = new Pair[2];
 			}
-			
 		});
 	}
-	
+
 	/**
-	 * helper method that creates the bottom players empty card slots and
-	 * contains an event handler for clicking when players swap cards.
-	 * player cards by default are stackpanes with a transparent rectangle
-	 * and when a card is placed on top of card it is just added to stackpane
+	 * helper method that creates the bottom players empty card slots and contains
+	 * an event handler for clicking when players swap cards. player cards by
+	 * default are stackpanes with a transparent rectangle and when a card is placed
+	 * on top of card it is just added to stackpane
 	 */
 	private void createBottomChamp() {
 		bottomChampions = createChampSlots();
 		bottomChampions.setOnMouseClicked((event) -> {
 			int childIndex = findChild(event.getX());
-			if(moveCards[0] == null) {
-				Pair pair = new Pair(bottomChampions, childIndex);
+			if (moveCards[0] == null) {
+				Pair pair = new Pair(bottomChampions, 1, childIndex);
 				moveCards[0] = pair;
-			}else {
-				Pair pair = new Pair(bottomChampions, childIndex);
+			} else {
+				Pair pair = new Pair(bottomChampions, 1, childIndex);
 				moveCards[1] = pair;
-				swapCards();
+				controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
+				moveCards = new Pair[2];
 			}
-			
+
 		});
 	}
-	
+
+	/**
+	 * helper method that creates champions cardslots.
+	 * 
+	 * @return tempBox, HBox cardslots for champions
+	 */
+
+	// TODO create labels near player side where it displays the current traits on
+	// their board
+	// change player to flowplane and set player in center and traits on
+	// top,bottom,left,right
+	private StackPane createPlayerArea(Player p1) {
+		// controller get traits
+		Label trait = new Label("Buffs");
+		trait.setTextFill(Color.SNOW);
+
+		Image player = new Image("baseCard.png");
+		ImageView pic = new ImageView();
+		pic.setPreserveRatio(true);
+		pic.setImage(player);
+		pic.setFitHeight(140);
+		Rectangle champ2Back = new Rectangle(125, 120, Color.SADDLEBROWN);
+
+		Label hp = new Label("" + p1.getHealth());
+		hp.setTextFill(Color.BLACK);
+
+		// get moneys
+		Image money = new Image("coin.png");
+		ImageView moneyView = new ImageView(money);
+		moneyView.setPreserveRatio(true);
+		moneyView.setFitHeight(18);
+
+		Label moneyText = new Label(Integer.toString(p1.getGold()));
+		moneyText.setTextFill(Color.YELLOW);
+		moneyText.setOpacity(100);
+
+		StackPane back2 = new StackPane(champ2Back, pic, trait, hp, moneyView, moneyText);
+		back2.setMargin(trait, new Insets(110, 40, 0, 0));
+		back2.setMargin(hp, new Insets(55, 25, 0, 0));
+		back2.setMargin(moneyView, new Insets(55, 0, 0, 20));
+		back2.setMargin(moneyText, new Insets(54, 0, 0, 50));
+
+		return back2;
+
+	}
+
+	/**
+	 * helper method that creates the empty champion spots in front of the player
+	 * 
+	 * @return tempBox, HBox holds empty spaces for the champion slots
+	 */
 	private HBox createChampSlots() {
 		HBox tempBox = new HBox(8);
 		for (int col = 0; col < 7; col++) {
-			Rectangle placeHolder = new Rectangle(125,125,Color.TRANSPARENT);
-			
-			//how a card may be put on the board later, is used for now for testing
-			Image emptyCard = new Image("/assets/baseCard.png");
-			ImageView pic = new ImageView();
-			pic.setPreserveRatio(true);
-			pic.setImage(emptyCard);
-			pic.setFitHeight(125);
-			
-			
+			Rectangle placeHolder = new Rectangle(125, 125, Color.TRANSPARENT);
 			StackPane backgroundCard = new StackPane(placeHolder);
-			backgroundCard.setBackground(new Background(new BackgroundFill(Color.SADDLEBROWN,null,null)));
-
+			backgroundCard.setBackground(new Background(new BackgroundFill(Color.SADDLEBROWN, null, null)));
 			tempBox.getChildren().add(backgroundCard);
 		}
 		return tempBox;
 	}
-	
+
 	/**
-	 * helper method for event that takes where the user clicked 
-	 * and finds the index of the child node of where the the user clicked
+	 * helper method for event that takes where the user clicked and finds the index
+	 * of the child node of where the the user clicked
 	 * 
 	 * @param click, double that is the x-coordinate of where user clicked
 	 * @return index, int that is the index of what node was clicked.
@@ -147,114 +249,81 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	private int findChild(double click) {
 		double start = 0;
 		double end = 125;
-		for(int index = 0; index < 7; index++) {
-			if(click >= start && click <= end) {
+		for (int index = 0; index < 7; index++) {
+			if (click >= start && click <= end) {
 				return index;
 			}
 			start += 125 + 8;
-			end += 125 + 8;	
+			end += 125 + 8;
 		}
 		return -1;
-		
+
 	}
-	
+
 	/**
-	 * helper method that once two cards have been clicked will swap
-	 * the two cards chosen. Uses the Pair[] moveCards to determine what 
-	 * children to move and where
-	 */
-	private void swapCards() {
-		//can add if shop take money
-		StackPane pane0 = (StackPane) moveCards[0].cards.getChildren().get(moveCards[0].index);
-		System.out.println(pane0.getChildren().size());
-		StackPane pane1 = (StackPane) moveCards[1].cards.getChildren().get(moveCards[1].index);
-		System.out.println(pane1.getChildren().size());
-		if(pane0.equals(pane1)) {
-			return;
-		}
-		if(pane0.getChildren().size() == 1 && pane1.getChildren().size()==1) {
-			return;			
-		}else if(pane0.getChildren().size() == 1) {
-			pane0.getChildren().add(pane1.getChildren().remove(1));
-		}else if(pane1.getChildren().size() == 1) {
-			pane1.getChildren().add(pane0.getChildren().remove(1));
-		}else {
-			Node node0 = pane0.getChildren().remove(1);
-			Node node1 = pane1.getChildren().remove(1);
-			pane0.getChildren().add(node1);
-			pane1.getChildren().add(node0);
-		}
-		moveCards = new Pair[2];
-	}
-	
-	/**
-	 * helper method that creates the to player slot and creates the top player 
+	 * helper method that creates the to player slot and creates the top player
 	 * bench. be more descriptive soon and make it look nice
 	 */
 	private void createTopPlayer() {
 		topPlayer = new VBox(10);
-		Rectangle placeHolder = new Rectangle(125,125,Color.TRANSPARENT);
-		HBox topBench = createBench();
+		topBench = createBench();
 		topBench.setAlignment(Pos.CENTER);
-		topBench.setOnMouseClicked((event)->{
+		topBench.setOnMouseClicked((event) -> {
 			int childIndex = findChild(event.getX());
-			if(moveCards[0] == null) {
-				Pair pair = new Pair(topBench, childIndex);
+			if (moveCards[0] == null) {
+				Pair pair = new Pair(topBench, 0, childIndex);
 				moveCards[0] = pair;
-			}else {
-				Pair pair = new Pair(topBench, childIndex);
+			} else {
+				Pair pair = new Pair(topBench, 0, childIndex);
 				moveCards[1] = pair;
-				swapCards();
+				controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
+				moveCards = new Pair[2];
 			}
 		});
-		
-		Image player1 = new Image("/assets/baseCard.png");
-		ImageView pic1 = new ImageView();
-		pic1.setPreserveRatio(true);
-		pic1.setImage(player1);
-		pic1.setFitHeight(140);
-		Rectangle champ1Back = new Rectangle(140,120, Color.SADDLEBROWN);
-		StackPane back1 = new StackPane(champ1Back,pic1);
-		
-		topPlayer.getChildren().addAll(topBench,back1);
-		gameBoard.setTop(topPlayer);
-		gameBoard.setAlignment(pic1, Pos.TOP_CENTER);
+
+		topStats = createPlayerArea(controller.getP2());
+
+		topPlayer.getChildren().addAll(topBench, playerAndItems(topStats), topChampions);
+
 	}
-	
+
 	/**
-	 * helper method that creates the to player slot and creates the top player 
+	 * helper method that creates the to player slot and creates the top player
 	 * bench. be more descriptive soon and make it look nice
 	 */
 	private void createBottomPlayer() {
 		bottomPlayer = new VBox(10);
-		HBox bottomBench = createBench();
+		bottomBench = createBench();
 		bottomBench.setAlignment(Pos.CENTER);
 		bottomBench.setOnMouseClicked((event) -> {
 			int childIndex = findChild(event.getX());
-			if(moveCards[0] == null) {
-				Pair pair = new Pair(bottomBench, childIndex);
+			if (moveCards[0] == null) {
+				Pair pair = new Pair(bottomBench, 0, childIndex);
 				moveCards[0] = pair;
-			}else {
-				Pair pair = new Pair(bottomBench, childIndex);
+			} else {
+				Pair pair = new Pair(bottomBench, 0, childIndex);
 				moveCards[1] = pair;
-				swapCards();
+				controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
+				moveCards = new Pair[2];
 			}
 		});
-		//this is the player card that is by itself
-		Image player2 = new Image("/assets/baseCard.png");
-		ImageView pic2 = new ImageView();
-		pic2.setPreserveRatio(true);
-		pic2.setImage(player2);
-		pic2.setFitHeight(140);
-		Rectangle champ2Back = new Rectangle(140,120, Color.SADDLEBROWN);
-		StackPane back2 = new StackPane(champ2Back,pic2);
-		
-		bottomPlayer.getChildren().addAll(back2, bottomBench);
-		gameBoard.setBottom(bottomPlayer);
-		gameBoard.setAlignment(pic2, Pos.BOTTOM_CENTER);
-		
+
+		bottomStats = createPlayerArea(controller.getP1());
+
+		bottomPlayer.getChildren().addAll(bottomChampions, playerAndItems(bottomStats), bottomBench);
+
+	}
+
+	private FlowPane playerAndItems(StackPane stats) {
+		FlowPane flow = new FlowPane();
+		flow.setHgap(8);
+		flow.setPadding(new Insets(7));
+		flow.getChildren().add(stats);	
+		flow.setAlignment(Pos.BASELINE_CENTER);
+		return flow;
 	}
 	
+
 	/**
 	 * helper method that creates an Hbox of how the bench will look like
 	 * 
@@ -263,55 +332,252 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	private HBox createBench() {
 		HBox tempBox = new HBox();
 		for (int col = 0; col < 7; col++) {
-			Rectangle placeHolder = new Rectangle(125,125,Color.TRANSPARENT);
-			
-			//how a card may be put on the board later is used for now for testing
-			Image emptyCard = new Image("/assets/baseCard.png");
+			Rectangle placeHolder = new Rectangle(125, 125, Color.TRANSPARENT);
+			StackPane backgroundCard = new StackPane(placeHolder);
+			backgroundCard.setBackground(new Background(new BackgroundFill(Color.SADDLEBROWN, null, null)));
+
+			tempBox.getChildren().add(backgroundCard);
+		}
+		return tempBox;
+
+	}
+
+	// needs to take champ class card
+	private StackPane createCard(Card champ) {
+			//gets base card pic?
+			System.out.println("/assets/" + champ.getName().toLowerCase() + "Card.png");
+			String cardName = ("/assets/" + champ.getName().toLowerCase() + "Card.png");
+			Image emptyCard = new Image(cardName);
 			ImageView pic = new ImageView();
 			pic.setPreserveRatio(true);
 			pic.setImage(emptyCard);
 			pic.setFitHeight(125);
 			
-			
-			StackPane backgroundCard = new StackPane(placeHolder,pic);
-			backgroundCard.setBackground(new Background(new BackgroundFill(Color.SADDLEBROWN,null,null)));
+			//TODO check if this gets correct stats
+			StackPane pane = new StackPane();
+			String attackStr = Integer.toString(champ.getAtk());
+			String hpStr = Integer.toString(champ.getHp());
+			Label hp = new Label(hpStr);
+			hp.setTextFill(Color.BLACK);
 
-			tempBox.getChildren().add(backgroundCard);
+			Label attack = new Label(attackStr);
+			attack.setTextFill(Color.BLACK);
+
+			Image money = new Image("coin.png");
+			ImageView moneyView = new ImageView(money);
+			moneyView.setPreserveRatio(true);
+			moneyView.setFitHeight(18);
+
+			Label moneyText = new Label("" + champ.getPrice());
+			moneyText.setTextFill(Color.YELLOW);
+			moneyText.setOpacity(100);
+
+			pane.setAlignment(Pos.CENTER);
+			pane.getChildren().addAll(pic, hp, attack, moneyView, moneyText);
+			pane.setMargin(attack, new Insets(105, -10, 0, 40));
+			pane.setMargin(hp, new Insets(105, 15, 0, 0));	
+			pane.setMargin(moneyView, new Insets(0, 50, 110, 0));
+			pane.setMargin(moneyText, new Insets(0, 25, 110, 0));
+			return pane;
 		}
-		return tempBox;
-			
+
+	// how shop is created
+	private void createShop() {
+		shop = new VBox(8);
+		controller.startShopPhase();
+		Player player = controller.getP1();
+		LinkedList<Card> shopArray = controller.getShop(player);
+
+		cardsForSale = createChampSlots();
+		for (int index = 0; index < shopArray.size() && index < cardsForSale.getChildren().size(); index++) {
+			StackPane card = createCard(shopArray.get(index));
+			StackPane emptySlot = (StackPane) cardsForSale.getChildren().get(index);
+			emptySlot.getChildren().add(card);
+		}
+		// TODO fix this for sure
+		cardsForSale.setOnMouseClicked((event) -> {
+			int childIndex = findChild(event.getX());
+			Player p1 = controller.getP1();
+			controller.buyCharacter(p1, childIndex);
+			Pair playerCards = new Pair(bottomBench, 0, findEmptySpot(bottomBench));
+			moveCards[1] = playerCards;
+			Pair shopCards = new Pair(cardsForSale, 1, childIndex);
+			moveCards[0] = shopCards;
+			controller.changePosition(moveCards[0].indices, 2, moveCards[1].indices);
+			moveCards = new Pair[2];
+
+		});
+		HBox shopArea = createShopArea();
+		HBox sellArea = createBench();
+		sellArea.setAlignment(Pos.CENTER);
+		sellArea.setOnMouseClicked((event) -> {
+			if (moveCards[0] != null) {
+				Player p1 = controller.getP1();
+				controller.sellChampion(p1, moveCards[0].indices[0], moveCards[0].indices[1]);
+				moveCards = new Pair[2];
+			}
+		});
+		shop.getChildren().addAll(sellArea, shopArea, cardsForSale);
+
+
+		// get model shop and read array characters
+
 	}
 
-	private Image getImage(String filePath) throws IOException {
-		InputStream stream = new FileInputStream(filePath);
-		Image image = new Image(stream);
-		return image;
+	private int findEmptySpot(HBox area) {
+		int index = 0;
+		for (Node node : area.getChildren()) {
+			StackPane pane = (StackPane) node;
+			if (pane.getChildren().size() == 1) {
+				return index;
+			}
+			index++;
+		}
+		return index;
+	}
+
+	private HBox createShopArea() {
+		HBox playerArea = new HBox(1);
+
+		// controller get traits
+		Image reroll = new Image("rerollBig.png");
+		ImageView viewReroll = new ImageView(reroll);
+		viewReroll.setPreserveRatio(true);
+		viewReroll.setFitHeight(50);
+		playerArea.getChildren().add(viewReroll);
+		// reroll event
+		viewReroll.setOnMouseClicked((event) -> {
+			Player p1 = controller.getP1();
+			controller.rerollShop(p1);
+			update(null,p1);
+		});
+
+		Image player = new Image("shopKeeper.jpg");
+		ImageView pic = new ImageView();
+		pic.setPreserveRatio(true);
+		pic.setImage(player);
+		pic.setFitHeight(140);
+		Rectangle champ2Back = new Rectangle(140, 120, Color.SADDLEBROWN);
+		StackPane back2 = new StackPane(champ2Back, pic);
+		playerArea.getChildren().add(back2);
+
+		Image upgrade = new Image("upgradeBig.png");
+		ImageView viewUpgrade = new ImageView(upgrade);
+		viewUpgrade.setPreserveRatio(true);
+		viewUpgrade.setFitHeight(50);
+		playerArea.getChildren().add(viewUpgrade);
+		playerArea.getChildren().add(timer);
+		playerArea.setAlignment(Pos.CENTER);
+		// upgrade handler
+		// TODO leveling up rerolls shop
+		viewUpgrade.setOnMouseClicked((event) -> {
+			Player p1 = controller.getP1();
+			controller.levelup(p1);
+			update(null, p1);
+
+		});
+
+		playerArea.setAlignment(Pos.CENTER);
+		return playerArea;
+
 	}
 
 	@Override
 	public void update(Observable o, Object arg) {
-		// TODO Auto-generated method stub
+		// should add if arg is player 1
+		Player p1 = controller.getP1();
+		LinkedList<Card> champSlots = p1.getBoard();
+		remakeHbox(bottomChampions, champSlots);
+
+		LinkedList<Card> bench = p1.getBench();
+		remakeHbox(bottomBench, bench);
+		changeStats(1);
+		FlowPane fPane = (FlowPane) bottomPlayer.getChildren().get(1);
+		if (!attackPhase) {
+			LinkedList<Card> shopCards = controller.getShop(p1);
+
+			remakeHbox(cardsForSale, shopCards);
+				
+		}else {
+
+			Player p2 = controller.getP2();
+			LinkedList<Card> champSlots2 = p2.getBoard();
+			remakeHbox(topChampions, champSlots2);
+			changeStats(2);
+
+		}
+		
+		if(controller.isGameOver()) {
+			System.out.println("its over");
+			System.exit(0);
+		}
 
 	}
-	
+
+	private void remakeHbox(HBox cardArea, LinkedList<Card> champSlots) {
+
+		for (Node node : cardArea.getChildren()) {
+			StackPane pane = (StackPane) node;
+			if (pane.getChildren().size() > 1) {
+				pane.getChildren().remove(1);
+			}
+		}
+		for (int index = 0; index < champSlots.size() && index < cardArea.getChildren().size(); index++) {
+			if (champSlots.get(index) == null) {
+				continue;
+			} else {
+				StackPane card = createCard(champSlots.get(index));
+				StackPane slot = (StackPane) cardArea.getChildren().get(index);
+				slot.getChildren().add(card);
+			}
+		}
+	}
+
 	/**
-	 * This class was made for the purpose of helping swap cards
-	 * so an object will hold two types one being an HBox and the other
-	 * is an integer that is the index to a specific child.
+	 * bottomStats or topStats : [2] = buff label, [3] = hp Label, [5] = money label
+	 * champcard stack pane [2] = hp possibly update hp during fight?
+	 * 
+	 * @param player
+	 */
+	private void changeStats(int player) {
+		if (player == 1) {
+			Player p1 = controller.getP1();
+			Label money = (Label) bottomStats.getChildren().get(5);
+			money.setText("" + p1.getGold());
+			
+			
+
+			Label hp = (Label) bottomStats.getChildren().get(3);
+			hp.setText("" + p1.getHealth());
+		}else if(player == 2) {
+			Player p2 = controller.getP2();
+			Label money = (Label) bottomStats.getChildren().get(5);
+			money.setText("" + p2.getGold());
+			Label hp = (Label) bottomStats.getChildren().get(3);
+			hp.setText("" + p2.getHealth());
+		}
+
+	}
+
+	/**
+	 * This class was made for the purpose of helping swap cards so an object will
+	 * hold two types one being an HBox and the other is an integer that is the
+	 * index to a specific child.
 	 *
 	 */
-	private class Pair{
+	private class Pair {
 		public HBox cards;
-		public int index;
-		
+		public int[] indices;
+
 		/**
 		 * constructor method for object Pair
+		 * 
 		 * @param newCards, an Hbox containing cards
-		 * @param num, an index num to find a specific child node.
+		 * @param num,      an index num to find a specific child node.
 		 */
-		public Pair(HBox newCards, int num) {
+		public Pair(HBox newCards, int isField, int num) {
 			cards = newCards;
-			index = num;
+			indices = new int[] { isField, num };
 		}
 	}
 
