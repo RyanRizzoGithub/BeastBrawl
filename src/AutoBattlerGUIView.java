@@ -3,6 +3,7 @@ package src;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Timer;
@@ -327,6 +328,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	// needs to take champ class card
 	private StackPane createCard(Card champ) {
 			//gets base card pic?
+			System.out.println("/assets/" + champ.getName().toLowerCase() + "Card.png");
 			String cardName = ("/assets/" + champ.getName().toLowerCase() + "Card.png");
 			Image emptyCard = new Image(cardName);
 			ImageView pic = new ImageView();
@@ -367,11 +369,11 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		shop = new VBox(8);
 		controller.startShopPhase();
 		Player player = controller.getP1();
-		Card[] shopArray = controller.getShop(player);
+		LinkedList<Card> shopArray = controller.getShop(player);
 
 		cardsForSale = createChampSlots();
-		for (int index = 0; index < shopArray.length; index++) {
-			StackPane card = createCard(shopArray[index]);
+		for (int index = 0; index < shopArray.size() && index < cardsForSale.getChildren().size(); index++) {
+			StackPane card = createCard(shopArray.get(index));
 			StackPane emptySlot = (StackPane) cardsForSale.getChildren().get(index);
 			emptySlot.getChildren().add(card);
 		}
@@ -467,22 +469,22 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	public void update(Observable o, Object arg) {
 		// should add if arg is player 1
 		Player p1 = controller.getP1();
-		Card[] champSlots = p1.getBattleField();
+		LinkedList<Card> champSlots = p1.getBoard();
 		remakeHbox(bottomChampions, champSlots);
 
-		Card[] bench = p1.getBench();
+		LinkedList<Card> bench = p1.getBench();
 		remakeHbox(bottomBench, bench);
 		changeStats(1);
 		FlowPane fPane = (FlowPane) bottomPlayer.getChildren().get(1);
 		if (!attackPhase) {
-			Card[] shopCards = controller.getShop(p1);
+			LinkedList<Card> shopCards = controller.getShop(p1);
 
 			remakeHbox(cardsForSale, shopCards);
 				
 		}else {
 
 			Player p2 = controller.getP2();
-			Card[] champSlots2 = p2.getBattleField();
+			LinkedList<Card> champSlots2 = p2.getBoard();
 			remakeHbox(topChampions, champSlots2);
 			changeStats(2);
 
@@ -495,7 +497,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 
 	}
 
-	private void remakeHbox(HBox cardArea, Card[] champSlots) {
+	private void remakeHbox(HBox cardArea, LinkedList<Card> champSlots) {
 
 		for (Node node : cardArea.getChildren()) {
 			StackPane pane = (StackPane) node;
@@ -503,11 +505,11 @@ public class AutoBattlerGUIView extends Application implements Observer {
 				pane.getChildren().remove(1);
 			}
 		}
-		for (int index = 0; index < champSlots.length; index++) {
-			if (champSlots[index] == null) {
+		for (int index = 0; index < champSlots.size() && index < cardArea.getChildren().size(); index++) {
+			if (champSlots.get(index) == null) {
 				continue;
 			} else {
-				StackPane card = createCard(champSlots[index]);
+				StackPane card = createCard(champSlots.get(index));
 				StackPane slot = (StackPane) cardArea.getChildren().get(index);
 				slot.getChildren().add(card);
 			}

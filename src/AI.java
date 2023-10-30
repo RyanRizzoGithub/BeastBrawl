@@ -10,7 +10,7 @@ public class AI {
 	private int difficulty;
 	private int health;
 	private int coins;
-	private Deck deck;
+	private Shop shop;
 	private LinkedList<Card> hand;
 	private LinkedList<Card> board;
 	
@@ -18,7 +18,7 @@ public class AI {
 		this.difficulty = difficulty;
 		this.health = 25;
 		this.coins = 0;
-		this.deck = new Deck();
+		this.shop = new Shop();
 		this.hand = new LinkedList<Card>();
 		this.board = new LinkedList<Card>();
 	}
@@ -30,12 +30,13 @@ public class AI {
 		// If this is an stupid difficulty ai
 		if (difficulty == 0) {
 			// Create a shop selection
-			Card[] selection = deck.drawShop(round);
+			shop.rollShop();
+			LinkedList<Card> options = shop.getShop();
 			
 			// Buy as many cards as we can
-			for (int i=0; i<selection.length; i++) {
-				if (selection[i].getPrice() <= coins) {
-					buyCard(selection[i]);
+			for (int i=0; i<options.size(); i++) {
+				if (options.get(i).getPrice() <= coins) {
+					buyCard(options.get(i));
 				}
 			}
 			
@@ -53,14 +54,15 @@ public class AI {
 		// If this is an easy difficulty ai
 		if (difficulty == 1) {
 			// Create a shop selection
-			Card[] selection = deck.drawShop(round);
+			shop.rollShop();
+			LinkedList<Card> options = shop.getShop();
 			
 			// Buy the best card in the shop (based on hp + atk)
-			Card bestBuy = selection[0];
-			for (int i=0; i<selection.length; i++) {
-				if (selection[i].getHp() + selection[i].getAtk() > 
+			Card bestBuy = options.get(0);
+			for (int i=0; i<options.size(); i++) {
+				if (options.get(i).getHp() + options.get(i).getAtk() > 
 				bestBuy.getHp() + bestBuy.getAtk()) {
-					bestBuy = selection[i];
+					bestBuy = options.get(i);
 				}
 			}
 			buyCard(bestBuy);

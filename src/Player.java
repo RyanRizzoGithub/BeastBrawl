@@ -2,6 +2,7 @@ package src;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import Creatures.Creature;
@@ -13,8 +14,8 @@ import Creatures.Wolf;
  * Also tracks health and gold count.
  */
 public class Player {
-    private final Card[] battleField;
-    private final Card[] bench;
+    private final LinkedList<Card> board;
+    private final LinkedList<Card> bench;
     private int health;
     private int gold;
     private int level;
@@ -26,8 +27,8 @@ public class Player {
      * Initializes battleField array to only allow 7 champions, located by index.
      */
     public Player() {
-        battleField = new Card[7];
-        bench       = new Card[7];
+        board		= new LinkedList<Card>();
+        bench       = new LinkedList<Card>();
         health      = 30;
         gold        = 10;
         level 		= 1;
@@ -93,7 +94,7 @@ public class Player {
      * Allows access to player's champions in the bench.
      * @return Arraylist of champions.
      */
-    public Card[] getBench() {
+    public LinkedList<Card> getBench() {
         return bench;
     }
     
@@ -147,8 +148,8 @@ public class Player {
      * Allows access to player's champions on the battlefield.
      * @return Array of champions.
      */
-    public Card[] getBattleField() {
-        return battleField;
+    public LinkedList<Card> getBoard() {
+        return board;
     }
     
     /**
@@ -175,7 +176,7 @@ public class Player {
     public int levelup(int goldRequired) {
     	if (goldRequired <= gold && level <= 5) {
     		spendGold(goldRequired);
-        	level += 1;
+        	shop.levelUp();
     	}
     	return level;
     }
@@ -195,15 +196,15 @@ public class Player {
      */
     public Card buyCharacter(int index) {
     	try {
-    		Card toBuy = shop.getShop()[index];
+    		Card toBuy = shop.getShop().get(index);
     		int i = 0;
-            while (bench[i] != null)
+            while (bench.get(i) != null)
                 i++;
         	if (i <= 7 && toBuy != null) {
         		if (gold >= toBuy.getPrice()) {
-        			bench[i] = toBuy;
+        			bench.set(i, toBuy);
         			spendGold(toBuy.getPrice());
-        			shop.getShop()[index] = null;
+        			shop.getShop().set(index, null);
         		}
         	}
         	return toBuy;
