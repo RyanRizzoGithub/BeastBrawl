@@ -166,12 +166,12 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		gameBoard.setMargin(topPlayer, new Insets(10,10,10,10));
 		controller.AIturn();
 		controller.startAttackPhase();
-		//attackPhase = false;
+		attackPhase = false;
 		controller.resetChampionStats();
-		//startGame();
-		//createShop();
-		//gameBoard.setTop(shop);
-		//gameBoard.setMargin(shop, new Insets(10,10,10,10));
+		startGame();
+		createShop();
+		gameBoard.setTop(shop);
+		gameBoard.setMargin(shop, new Insets(10,10,10,10));
 
 	}
 
