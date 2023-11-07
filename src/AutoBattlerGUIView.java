@@ -52,8 +52,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	private Pair[] moveCardsClicked;
 	private StackPane topStats;
 	private StackPane bottomStats;
-	private Label timer;
-	private int time;
+	
 	private boolean attackPhase;
 	private double startX;
 	private double startY;
@@ -71,6 +70,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	private int cardSlotY;
 	private int champFieldX;
 	private int playerImageY;
+	private Button turnButton;
 	
 	public AutoBattlerGUIView(Rectangle2D bounds) {
 		model = new AutoBattlerModel();
@@ -96,7 +96,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		cardSlotY=(int) (bounds.getWidth()/15);
 		Image background = new Image("Background.png");
 		gameBoard.setBackground(new Background(new BackgroundImage(background, null, null, null, null)));
-		title="Genshin Auto Battler";
+		title="Auto Battler";
 		startGame();
 		createTopChamp();
 		createBottomChamp();
@@ -117,14 +117,14 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		gameBoard.setMargin(shop, new Insets(10,10,10,10));
 		
 		
-		
-
-		// if in shop phase make another thing
 
 		// if in shop phase make another thing
 		gameScene= new Scene(gameBoard);
+		
+		
 		//letterbox(gameScene,gameBoard);
 	}
+	
 	public void setBounds(Rectangle2D newBounds) {
 		bounds=newBounds;
 	}
@@ -137,7 +137,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	}
 	@Override
 	public void start(Stage stage) throws Exception {
-		stage.setTitle("Genshin Auto Battler");
+		stage.setTitle("Auto Battler");
 		curStage =stage;
 
 	}
@@ -145,34 +145,19 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	public BorderPane getGameBoard() {
 		return gameBoard;
 	}
+	
+	
 	public void startGame() {
-		timer = new Label("");
-		timer.setTextFill(Color.BLACK);
-		Timer timer1 = new Timer();
-		TimerTask task = new TimerTask() {
-			int seconds = 10;
-			int i = 0;
+	    turnButton = new Button();
+	    turnButton.setText("end turn");
+	    turnButton.setTextFill(Color.BLACK);
 
-			@Override
-			public void run() {
-				i++;
-				if (i % seconds == 0) {
-					// start attack phase
-					
-					timer1.cancel();
-					attackPhase = true;
-					Platform.runLater(() -> attackStart());
-					
-
-				} else {
-					time = (seconds - (i % seconds));
-					Platform.runLater(() -> timer.setText("TIMER: " + time));
-				}
-
-			}
-		};
-
-		timer1.schedule(task, 0, 1000);
+		turnButton.setOnMouseClicked((event) -> {
+			// start attack phase
+			attackPhase = true;
+			Platform.runLater(() -> attackStart());
+			
+		});
 
 	}
 
@@ -180,15 +165,13 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		gameBoard.setTop(topPlayer);
 		gameBoard.setMargin(topPlayer, new Insets(10,10,10,10));
 		controller.AIturn();
-		//controller.giveTraitBonuses();
 		controller.startAttackPhase();
-		attackPhase = false;
-		
+		//attackPhase = false;
 		controller.resetChampionStats();
-		startGame();
-		createShop();
-		gameBoard.setTop(shop);
-		gameBoard.setMargin(shop, new Insets(10,10,10,10));
+		//startGame();
+		//createShop();
+		//gameBoard.setTop(shop);
+		//gameBoard.setMargin(shop, new Insets(10,10,10,10));
 
 	}
 
@@ -561,8 +544,8 @@ public class AutoBattlerGUIView extends Application implements Observer {
 
 			pane.setAlignment(Pos.CENTER);
 			pane.getChildren().addAll(pic, hp, attack, moneyView, moneyText);
-			pane.setMargin(attack, new Insets(cardSlotY-17, -10, 0, cardSlotX-35));
-			pane.setMargin(hp, new Insets(cardSlotY-17, cardSlotX-55, 0, 0));	
+			pane.setMargin(attack, new Insets(cardSlotY-28, 5, 0, cardSlotX-35));
+			pane.setMargin(hp, new Insets(cardSlotY-28, cardSlotX-75, 0, 0));	
 			pane.setMargin(moneyView, new Insets(0, bounds.getHeight()/15, cardSlotY-17, 0));
 			pane.setMargin(moneyText, new Insets(0, bounds.getHeight()/30.8, cardSlotY-17, 0));
 			//pane.setMaxHeight(cardSlotY);
@@ -674,7 +657,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		viewUpgrade.setPreserveRatio(true);
 		viewUpgrade.setFitHeight(height/20);
 		playerArea.getChildren().add(viewUpgrade);
-		playerArea.getChildren().add(timer);
+		playerArea.getChildren().add(turnButton);
 		//playerArea.setAlignment(Pos.CENTER);
 		// upgrade handler
 		// TODO leveling up rerolls shop
