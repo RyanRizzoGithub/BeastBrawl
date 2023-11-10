@@ -224,25 +224,6 @@ public class AutoBattlerGUIView extends Application implements Observer {
 			}
 
 		});
-		// moves by clicking
-		/*bottomChampions.box.setOnMouseClicked((event) -> {
-			int childIndex = findChild(event.getX());
-			if (moveCardsClicked[0] == null) {
-				
-				
-				Pair pair = new Pair(bottomChampions.box, 1, childIndex);
-				moveCardsClicked[0] = pair;
-				//s//tartingIndex = findChild(event.getX());
-				//startingFieldIndex=1;
-			} else {
-				
-				Pair pair = new Pair(bottomChampions.box, 1, childIndex);
-				moveCardsClicked[1] = pair;
-				controller.changePosition(moveCardsClicked[0].indices, 1, moveCardsClicked[1].indices);				
-				moveCardsClicked = new Pair[2];
-			}
-
-		});*/
 		
 	}
 
@@ -301,7 +282,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		tempBox.setAlignment(Pos.CENTER);
 		tempBox.setMaxHeight(cardSlotY);
 		
-		for (int col = 0; col < 7; col++) {
+		for (int col = 0; col < 10; col++) {
 			Rectangle placeHolder = new Rectangle(cardSlotX, cardSlotY, Color.TRANSPARENT);
 			StackPane backgroundCard = new StackPane(placeHolder);
 			backgroundCard.setBackground(new Background(new BackgroundFill(Color.SADDLEBROWN, null, null)));
@@ -320,14 +301,14 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	 * @return index, int that is the index of what node was clicked.
 	 */
 	private int findChild(double click) {
-		int offset =(int) (bounds.getWidth()-(7*(cardSlotX+15)))/2;
+		int offset =(int) (bounds.getWidth()-(10*(cardSlotX+15)))/2;
 		double start = offset;
 		double end = start+cardSlotX+10;
 		//System.out.println("--- "+click+"  offset = "+offset+" end = "+end+" card = "+cardSlotX);
-		for (int index = 0; index <= 7; index++) {
+		for (int index = 0; index <= 9; index++) {
 			if (click >= start && click <= end) {
 				//System.out.println(index+"  start = "+start+" end = "+end);
-				if(index==7) {
+				if(index==9) {
 					index--;
 				}
 				return index;
@@ -426,7 +407,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 
 		topStats = createPlayerArea(controller.getP2());
 
-		topPlayer.getChildren().addAll(topBench.box, playerAndItems(topStats), topChampions.box);
+		topPlayer.getChildren().addAll( playerAndItems(topStats), topChampions.box);
 
 	}
 
@@ -498,7 +479,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		int height =(int)bounds.getHeight();
 		tempBox.setMaxHeight(cardSlotY);
 		tempBox.setAlignment(Pos.CENTER);
-		for (int col = 0; col < 7; col++) {
+		for (int col = 0; col < 15; col++) {
 			Rectangle placeHolder = new Rectangle(cardSlotX, cardSlotY, Color.TRANSPARENT);
 			StackPane backgroundCard = new StackPane(placeHolder);
 			backgroundCard.setAlignment(Pos.CENTER);
@@ -586,6 +567,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		});
 		HBox shopArea = createShopArea();
 	
+		/*
 		HBox sellArea = createBench();
 	
 		//sellArea.setAlignment(Pos.CENTER);
@@ -595,8 +577,8 @@ public class AutoBattlerGUIView extends Application implements Observer {
 				controller.sellChampion(p1, moveCards[0].indices[0], moveCards[0].indices[1]);
 				moveCards = new Pair[2];
 			}
-		});
-		shop.getChildren().addAll(sellArea, shopArea, cardsForSale.box);
+		});*/
+		shop.getChildren().addAll(shopArea, cardsForSale.box);
 
 
 		// get model shop and read array characters

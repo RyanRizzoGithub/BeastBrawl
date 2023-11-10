@@ -185,7 +185,7 @@ public class AutoBattlerModel extends Observable {
         //while loop finds current attacker or next available attacker.
         while (attacker == null || attacker.getHp() <= 0) {
             attacker = attacking.getBattleField()[i];
-            if (i > 5)
+            if (i >= 9)
                 i = 0;
             else
                 i++;
@@ -194,10 +194,10 @@ public class AutoBattlerModel extends Observable {
         attacking.set_attack_card(i);
         System.out.println("This is the attacker: " + attacker.getName());
         while (defender == null || defender.getHp() <= 0) {
-            j = rng.nextInt(7);
+            j = rng.nextInt(9);
             //rng keeps choosing a random number until it can find a not empty slot
             while(defending.getBattleField()[j] == null) {
-            	j = rng.nextInt(7);
+            	j = rng.nextInt(9);
             }
             defender = defending.getBattleField()[j];
         }

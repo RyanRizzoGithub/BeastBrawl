@@ -26,12 +26,12 @@ public class Player {
      * Initializes battleField array to only allow 7 champions, located by index.
      */
     public Player() {
-        battleField = new Card[7];
-        bench       = new Card[7];
+        battleField = new Card[10];
+        bench       = new Card[15];
         health      = 30;
         gold        = 10;
-        level 		= 1;
         shop 		= new Shop();
+        level 		= shop.getLevel();
         attacking_card  	= 0;
     }
     
@@ -175,8 +175,9 @@ public class Player {
     public int levelup(int goldRequired) {
     	if (goldRequired <= gold && level <= 5) {
     		spendGold(goldRequired);
-        	level += 1;
+        	shop.levelUp();
     	}
+    	level += 1;
     	return level;
     }
     
