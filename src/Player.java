@@ -20,19 +20,21 @@ public class Player {
     private int level;
     private Shop shop;
     private int attacking_card;
+    private int roundsSince;
 
     /**
      * Creates player object with default stats and zero champions.
      * Initializes battleField array to only allow 7 champions, located by index.
      */
     public Player() {
-        battleField = new Card[7];
-        bench       = new Card[7];
+        battleField = new Card[10];
+        bench       = new Card[15];
         health      = 30;
-        gold        = 10;
-        level 		= 1;
+        gold        = 1;
         shop 		= new Shop();
+        level 		= shop.getLevel();
         attacking_card  	= 0;
+        roundsSince = 0;
     }
     
     /*
@@ -77,8 +79,11 @@ public class Player {
      * Increases the player's gold by the given amount.
      * @param amount
      */
-    public void earnGold(int amount) {
-        gold += amount;
+    public void setGold(int amount) {
+        gold = amount;
+        if(gold >= 10) {
+        	gold = 10;
+        }
     }
     
     /**
@@ -172,12 +177,20 @@ public class Player {
      * @param goldRequired  the gold required to upgrade that level
      * @return              the level after the levelUp
      */
-    public int levelup(int goldRequired) {
+    public int levelup() {
+    	int goldRequired = level + 4 - roundsSince;
     	if (goldRequired <= gold && level <= 5) {
-    		spendGold(goldRequired);
+    		spendGold(level + 4 - roundsSince);
+        	shop.levelUp();
         	level += 1;
+        	roundsSince = 0;
     	}
     	return level;
+    }
+    
+    public void incRoundSince() {
+    	//bug check later it doesnt go negative
+    	roundsSince += 1;
     }
     
     /**

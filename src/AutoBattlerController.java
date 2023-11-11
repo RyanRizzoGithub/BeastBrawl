@@ -20,6 +20,7 @@ public class AutoBattlerController{
 	}
 	
 	public int levelup(Player player) {
+		//System.out.println(model.playerLevelUp(player));
 		return model.playerLevelUp(player);
 	} 
 	
