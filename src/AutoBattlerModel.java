@@ -42,6 +42,8 @@ public class AutoBattlerModel extends Observable {
      */
     public void attackPhase()  {
     	round += 1;
+    	p1.incRoundSince();
+    	p2.incRoundSince();
         Random rng = new Random();
         int attackRound = rng.nextInt(2);
         while (isRoundOver() == 0) {
@@ -62,14 +64,14 @@ public class AutoBattlerModel extends Observable {
         }
         //p1 won the round
         if (isRoundOver() == 1) {
-        	p1.earnGold(2*round);
-        	p2.earnGold(1*round);
+        	p1.setGold(round);
+        	p2.setGold(round);
         	//how they lose health now based on what round it is
         	p2.loseHealth(calculate_damage(p1));
         //p2 won the round
         } else if (isRoundOver() == 2) {
-        	p1.earnGold(1*round);
-        	p2.earnGold(2*round);
+        	p1.setGold(round);
+        	p2.setGold(round);
         	//how they lose health now
         	p1.loseHealth(calculate_damage(p2));
         }
@@ -164,8 +166,7 @@ public class AutoBattlerModel extends Observable {
      */
     public int playerLevelUp(Player player) {
     	int level = player.getLevel();
-    	int goldReq = level * 5;
-    	return player.levelup(goldReq);
+    	return player.levelup();
     }
     /**
      * Finds champions to attack with, and executes one single attack and respective defender's
@@ -206,12 +207,12 @@ public class AutoBattlerModel extends Observable {
         
         //TODO how should players be rewarded gold?
         if (result == 0) {
-        	defending.earnGold(2);
+        	defending.setGold(2);
         } else if (result == 1) {
-        	attacking.earnGold(2);
+        	attacking.setGold(2);
         }else {
-        	attacking.earnGold(2);
-        	defending.earnGold(2);
+        	attacking.setGold(2);
+        	defending.setGold(2);
         }
     }
     
@@ -433,14 +434,14 @@ public class AutoBattlerModel extends Observable {
     			return;
     		}
     		player.getBench()[index] = null;
-    		player.earnGold(toRemove.getPrice());
+    		player.setGold(toRemove.getPrice());
     	} else if (benchOrBattleField == 1) {
     		Card toRemove = player.getBattleField()[index];
     		if (toRemove == null) {
     			return;
     		}
     		player.getBattleField()[index] = null;
-    		player.earnGold(toRemove.getPrice());
+    		player.setGold(toRemove.getPrice());
     	}
     	setChanged();
     	notifyObservers(player);
