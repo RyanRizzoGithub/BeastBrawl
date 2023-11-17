@@ -18,6 +18,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -42,7 +43,8 @@ public class StartMenuGUI extends Application {
 	public StartMenuGUI() {
 		menuPage = new BorderPane();
 		Image background = new Image("assets/Background.png");
-		menuPage.setBackground(new Background(new BackgroundImage(background, null, null, null, null)));
+		
+		
 		menuPage.setMinWidth(800);
 		menuPage.setMinHeight(700);
 		VBox menuContents =new VBox();
@@ -67,7 +69,8 @@ public class StartMenuGUI extends Application {
 		
 		gameGUI.setBounds(bounds);
 		gameGUI.setMainMenuGUI(this);
-		
+		BackgroundSize screenSize = new BackgroundSize(bounds.getWidth(), bounds.getHeight(),true, true, true, true);
+		menuPage.setBackground(new Background(new BackgroundImage(background, null, null, null, screenSize)));
 		menuPage.setCenter(menuContents);
 		menuContents.setAlignment(Pos.CENTER);
 		

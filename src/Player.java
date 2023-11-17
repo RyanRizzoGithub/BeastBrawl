@@ -219,6 +219,8 @@ public class Player {
         			shop.getShop()[index] = null;
         		}
         	}
+        	
+        	
         	return toBuy;
     	} catch (Exception ArrayIndexOutOfBoundsException){
     		//not sure what this is yet

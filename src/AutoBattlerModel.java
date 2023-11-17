@@ -388,7 +388,7 @@ public class AutoBattlerModel extends Observable {
      * @return              true if a champion exists in at least one of the two slots.
      */
     private boolean champSwap(int[] origin, Player player, int destination) {
-    	if (origin[0] < 0|| origin[1] < 0 || destination < 0 || destination > 7) {
+    	if (origin[0] < 0|| origin[1] < 0 || destination < 0 || destination > 15) {
     		return false;
     	}
         if (origin[0] == 0) {
