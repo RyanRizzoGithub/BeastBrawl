@@ -2,6 +2,8 @@ package src;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +36,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 
-public class AutoBattlerGUIView extends Application implements Observer {
+public class AutoBattlerGUIView extends Application implements Observer, PropertyChangeListener  {
 
 	private AutoBattlerModel model;
 	private AutoBattlerController controller;
@@ -70,12 +72,17 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	private int champFieldX;
 	private int playerImageY;
 	private Button turnButton;
+	private Button step;
+	private Button endAttack;
 	
 	public AutoBattlerGUIView(Rectangle2D bounds) {
 		model = new AutoBattlerModel();
-		model.addObserver(this);
+		model.addObserver(this);; //this is how you win the bitches
 		controller = new AutoBattlerController(model);
 		gameBoard = new BorderPane();
+		stepButton();
+		endAttackButton();
+		
 		
 		moveCards = new Pair[2];
 		moveCardsClicked = new Pair[2];
@@ -159,18 +166,47 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		});
 
 	}
+	
+	private void stepButton() {
+		step = new Button();
+		step.setText("step");
+	    step.setTextFill(Color.BLACK);
+	    step.setOnMouseClicked((event) ->{
+	    	
+	    	controller.startAttackPhase();
+	    	if (controller.getIsRoundOver() != 0) {
+	    		endAttack.setVisible(true);
+	    		step.setVisible(false);
+	    	}
+	    });
+	}
+	
+	private void endAttackButton() {
+		endAttack = new Button();
+		endAttack.setVisible(false);
+		endAttack.setText("End Attack Phase");
+		endAttack.setTextFill(Color.BLACK);
+		endAttack.setOnMouseClicked((event) -> {
+			controller.startAttackPhase(); //called one more time to distribute coins
+			attackPhase = false;
+			controller.resetChampionStats();
+			System.out.println("attack phase is over here");
+			startGame();
+			createShop();
+			gameBoard.setTop(shop);
+			gameBoard.setMargin(shop, new Insets(10,10,10,10));
+			step.setVisible(true);
+			endAttack.setVisible(false);
+			
+		});
+		
+	}
 
 	private void attackStart() {
 		gameBoard.setTop(topPlayer);
 		gameBoard.setMargin(topPlayer, new Insets(10,10,10,10));
 		controller.AIturn();
-		controller.startAttackPhase();
-		attackPhase = false;
-		controller.resetChampionStats();
-		startGame();
-		createShop();
-		gameBoard.setTop(shop);
-		gameBoard.setMargin(shop, new Insets(10,10,10,10));
+		
 
 	}
 
@@ -408,6 +444,8 @@ public class AutoBattlerGUIView extends Application implements Observer {
 		topStats = createPlayerArea(controller.getP2());
 
 		topPlayer.getChildren().addAll( playerAndItems(topStats), topChampions.box);
+		topPlayer.getChildren().add(step);
+		topPlayer.getChildren().add(endAttack);
 
 	}
 
@@ -509,6 +547,8 @@ public class AutoBattlerGUIView extends Application implements Observer {
 			String hpStr = Integer.toString(champ.getHp());
 			Label hp = new Label(hpStr);
 			hp.setTextFill(Color.BLACK);
+			
+			
 
 			Label attack = new Label(attackStr);
 			attack.setTextFill(Color.BLACK);
@@ -657,6 +697,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 	@Override
 	public void update(Observable o, Object arg) {
 		// should add if arg is player 1
+		
 		Player p1 = controller.getP1();
 		Card[] champSlots = p1.getBattleField();
 		remakeHbox(bottomChampions, champSlots);
@@ -671,7 +712,6 @@ public class AutoBattlerGUIView extends Application implements Observer {
 			remakeHbox(cardsForSale, shopCards);
 				
 		}else {
-
 			Player p2 = controller.getP2();
 			Card[] champSlots2 = p2.getBattleField();
 			remakeHbox(topChampions, champSlots2);
@@ -727,7 +767,7 @@ public class AutoBattlerGUIView extends Application implements Observer {
 						// gets field the mouse is over
 						if(fieldIndex>=0) {
 							CardFieldUI fieldDroppedOn = cardFieldList.get(fieldIndex);
-							System.out.println("moving to "+childIndex+" from "+moveCards[0].indices[1]+" in field "+fieldIndex);
+							//System.out.println("moving to "+childIndex+" from "+moveCards[0].indices[1]+" in field "+fieldIndex);
 							// saves the card and the position of what the mouse was over when released
 							Pair pair = new Pair(fieldDroppedOn.box, fieldIndex, childIndex);
 							moveCards[1] = pair;
@@ -806,6 +846,13 @@ public class AutoBattlerGUIView extends Application implements Observer {
 			cards = newCards;
 			indices = new int[] { isField, num };
 		}
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		// TODO Auto-generated method stub
+		update(null,null);
+		
 	}
 
 	
