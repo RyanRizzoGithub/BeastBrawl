@@ -3,11 +3,9 @@ package src;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-
+import java.util.Observable;
 import java.util.Random;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 //import Creatures.Creature;
 
 
@@ -16,16 +14,12 @@ import java.beans.PropertyChangeSupport;
  * Contains two player objects, and allows interaction between them. Thus simulating
  * the state and progression of the game.
  */
-public class AutoBattlerModel  {
+public class AutoBattlerModel extends Observable {
     private final Player p1;
     private final Player p2;
     private int round;
-    private int attackRound;
     private int p1_attack_card;
     private int p2_attack_card;
-    private final PropertyChangeSupport propertyChangeSupport;
-    
-
 
     /**
      * constructor for board object.
@@ -35,40 +29,8 @@ public class AutoBattlerModel  {
         p1 = new Player();
         p2 = new Player();
         round = 1;
-        Random rng = new Random();
-        attackRound = rng.nextInt(2);
         p1_attack_card = 0;
         p2_attack_card = 0;
-        propertyChangeSupport = new PropertyChangeSupport(this);
-    }
-    
-    /*
-     * How to add observer to the model
-     */
-    public void addObserver(PropertyChangeListener listener) {
-        propertyChangeSupport.addPropertyChangeListener(listener);
-    }
-
-    public void removeObserver(PropertyChangeListener listener) {
-        propertyChangeSupport.removePropertyChangeListener(listener);
-    }
-
-    /*
-     * how to notify observer something is changing. should this have methods?
-     */
-    private void notifyObservers(String propertyName, Object oldValue, Object newValue) {
-    	
-        propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
-        
-        
-    }
-    
-    /* 
-     * not sure how this is suppose to work
-     */
-    private void setChanged() {
-        // Notify observers with the appropriate property name
-    	notifyObservers("modelStateChanged", null, this);
     }
 
     /**
@@ -79,39 +41,27 @@ public class AutoBattlerModel  {
      * 
      */
     public void attackPhase()  {
+    	round += 1;
     	p1.incRoundSince();
     	p2.incRoundSince();
-       // Random rng = new Random();
-        //int attackRound = rng.nextInt(2);
-        if (isRoundOver() == 0) {
+        Random rng = new Random();
+        int attackRound = rng.nextInt(2);
+        while (isRoundOver() == 0) {
         	//if attackround is 0 p1 attacks first
             if (attackRound % 2 == 0) { 
                 // p1 attacks
-                findChamps(p1, p2);
+                findChamps(rng, p1, p2);
             }
             else {
                 // p2 attacks first if attackround is 1
-                findChamps(p2, p1);
+                findChamps(rng, p2, p1);
             }
             //allows attack turn to be switched
             attackRound++;
-            setChanged(); 
-            
-            /*
-            synchronized (this) {
-            	try {
-					this.wait();
-				} catch (InterruptedException e) {
-					System.out.println("This thang did not wait");
-					e.printStackTrace();
-				}
-            }*/
-        	//notifyObservers();
+            setChanged();
+        	notifyObservers(null);
 
-        } else {
-        
-        round += 1;
-        
+        }
         //p1 won the round
         if (isRoundOver() == 1) {
         	p1.setGold(round);
@@ -125,12 +75,9 @@ public class AutoBattlerModel  {
         	//how they lose health now
         	p1.loseHealth(calculate_damage(p2));
         }
-       // resetChampStats(); i dont think we wanted this called yet
-        Random rng = new Random();//wildly inefficent but fix later
-        attackRound = rng.nextInt(2);
+        resetChampStats();
         setChanged();
-        }
-    	//notifyObservers(null);
+    	notifyObservers(null);
        
     }
     
@@ -151,6 +98,26 @@ public class AutoBattlerModel  {
     	return sum;
     }
     
+    /**
+     * Gives out Trait bonuses on the players battlefield
+     * @param player the current player
+     
+    public void giveOutTraitBonuses(Player player) {
+    	HashMap<String, Integer> traits = player.getActiveTraits();
+    	for (String bonus: traits.keySet()) {
+    		for (int i = 0; i < 7; i++) {
+    			if (player.getBattleField()[i] == null) {
+    				continue;
+    			// if the champions type is in the traits keyset, give that champion a bonus
+    			} else if (player.getBattleField()[i].getType().equals(bonus)) {
+    				player.getBattleField()[i].addBonus(bonus);
+    			}
+    		}
+    	}
+    	setChanged();
+    	notifyObservers(player);
+    }
+    */
     
     /**
      * Begins the shop phase by setting a new shop for both players
@@ -181,13 +148,13 @@ public class AutoBattlerModel  {
     	if (player.getGold() > 0) {
     		player.spendGold(1);
     		setChanged();
-        	//notifyObservers(player);
+        	notifyObservers(player);
         	player.getShop().rollShop();
     		return player.getShop().getShop();
     	}
     	//if the player doesn't have 1 gold, return the current shop
     	setChanged();
-    	//notifyObservers(player);
+    	notifyObservers(player);
 		return player.getShop().getShop();
     }
     
@@ -209,10 +176,9 @@ public class AutoBattlerModel  {
      * @param attacking Player that is attacking.
      * @param defending Player that is defending.
      */
-    private void findChamps(Player attacking, Player defending) { 
+    private void findChamps(Random rng, Player attacking, Player defending) { 
         int i = attacking.get_attack_card();
         int j;
-        Random rng = new Random();
         System.out.println("This player is attacking" + attacking.toString());
         System.out.println("This player is defending" + defending.toString());
         Card attacker = null;
@@ -237,8 +203,17 @@ public class AutoBattlerModel  {
             defender = defending.getBattleField()[j];
         }
         System.out.println("This is the defender: " + defender.getName());
-        int result = executeAttack(attacker, defender); //fix later
+        int result = executeAttack(attacker, defender);
         
+        //TODO how should players be rewarded gold?
+        if (result == 0) {
+        	defending.setGold(2);
+        } else if (result == 1) {
+        	attacking.setGold(2);
+        }else {
+        	attacking.setGold(2);
+        	defending.setGold(2);
+        }
     }
     
     /**
@@ -261,7 +236,7 @@ public class AutoBattlerModel  {
 		p1.set_attack_card(0);
 		p2.set_attack_card(0);
 		setChanged();
-    	//notifyObservers(null);
+    	notifyObservers(null);
     }
     
     
@@ -280,7 +255,7 @@ public class AutoBattlerModel  {
         defender.loseHp(attacker.getAtk());
         
         System.out.println("This is defender hp after attack " + defender.getHp());
-      
+       
        // attacker.loseHp(defender.getAtk());
         // both defending and attacking champ die
         if (defender.getHp() <= 0 && attacker.getHp() <= 0) {
@@ -300,7 +275,7 @@ public class AutoBattlerModel  {
      * @return if neither won return 0, if p1 wins, return 1, if p2 wins return 2,
      * if everythings dead, return 3
      */
-    public int isRoundOver() {
+    private int isRoundOver() {
         int p1Alive = 0;
         int p2Alive = 0;
         //if p1 has alive champs, stillAlive == 1
@@ -368,7 +343,7 @@ public class AutoBattlerModel  {
      * @return         true if a champion exists at the selected origin on the battlefield.
      */
     private boolean battleToBench(int origin, Player player, int destination) {
-    	if (origin < 0 || destination >= 7 || destination < 0) {
+    	if (origin < 0 || destination >= 15 || destination < 0) {
     		return false;
     	}
         if (player.getBattleField()[origin] == null) {
@@ -378,7 +353,7 @@ public class AutoBattlerModel  {
         player.getBench()[destination] = player.getBattleField()[origin];
         player.getBattleField()[origin] = temp;
         setChanged();
-    	//notifyObservers(player);
+    	notifyObservers(player);
         return true;
     }
 
@@ -401,7 +376,7 @@ public class AutoBattlerModel  {
         player.getBattleField()[destination] = player.getBench()[origin];
         player.getBench()[origin] = temp;
         setChanged();
-    	//notifyObservers(player);
+    	notifyObservers(player);
         return true;
     }
 
@@ -413,7 +388,7 @@ public class AutoBattlerModel  {
      * @return              true if a champion exists in at least one of the two slots.
      */
     private boolean champSwap(int[] origin, Player player, int destination) {
-    	if (origin[0] < 0|| origin[1] < 0 || destination < 0 || destination > 7) {
+    	if (origin[0] < 0|| origin[1] < 0 || destination < 0 || destination > 15) {
     		return false;
     	}
         if (origin[0] == 0) {
@@ -431,7 +406,7 @@ public class AutoBattlerModel  {
             player.getBattleField()[destination] = temp;
         }
         setChanged();
-    	//notifyObservers(player);
+    	notifyObservers(player);
         return true;
     }
 
@@ -469,13 +444,13 @@ public class AutoBattlerModel  {
     		player.setGold(toRemove.getPrice());
     	}
     	setChanged();
-    	//notifyObservers(player);
+    	notifyObservers(player);
     }
     
     public void buyCharacter(Player player,int location) {
     	player.buyCharacter(location);
     	setChanged();
-    	//notifyObservers(player);
+    	notifyObservers(player);
     }
     
     /**
@@ -506,7 +481,7 @@ public class AutoBattlerModel  {
     		benchToBattle(firstChampLocation, p2, i);
     	}
     	setChanged();
-    	//notifyObservers(null);
+    	notifyObservers(null);
     }
     
     /**

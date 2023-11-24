@@ -121,10 +121,6 @@ public class AutoBattlerController{
 		}
 		return false;
 	}
-	
-	public int getIsRoundOver() {
-		return model.isRoundOver();
-	}
 }
 
 

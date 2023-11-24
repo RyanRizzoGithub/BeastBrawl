@@ -212,13 +212,15 @@ public class Player {
     		int i = 0;
             while (bench[i] != null)
                 i++;
-        	if (i <= 7 && toBuy != null) {
-        		if (gold >= toBuy.getPrice()) {
+        	if (i <= 15 && toBuy != null) {
+        		if (true) {
         			bench[i] = toBuy;
         			spendGold(toBuy.getPrice());
         			shop.getShop()[index] = null;
         		}
         	}
+        	
+        	
         	return toBuy;
     	} catch (Exception ArrayIndexOutOfBoundsException){
     		//not sure what this is yet
