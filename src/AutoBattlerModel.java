@@ -374,7 +374,7 @@ public class AutoBattlerModel  {
      * @return         true if a champion exists at the selected origin on the battlefield.
      */
     private boolean battleToBench(int origin, Player player, int destination) {
-    	if (origin < 0 || destination >= 7 || destination < 0) {
+    	if (origin < 0 || destination >= 15 || destination < 0) {
     		return false;
     	}
         if (player.getBattleField()[origin] == null) {

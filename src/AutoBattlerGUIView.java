@@ -24,6 +24,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -41,6 +42,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import src.AutoBattlerGUIView.Pair;
 
 public class AutoBattlerGUIView extends Application implements Observer, PropertyChangeListener  {
 
@@ -68,9 +70,12 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	private ArrayList<CardFieldUI> cardFieldList;
 	private Scene gameScene;
 	private Scene mainMenuScene;
+	private Scene instructScene;
 	private StartMenuGUI mainMenuGUI;
+	private InstructionPageUI instructGUI;
 	private Stage curStage;
 	private ImageView mainMenuView;
+	private ImageView instructView;
 	private String title;
 	private Rectangle2D bounds;
 	private int cardSlotX;
@@ -105,9 +110,14 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		gameBoard.setPrefSize(w, h);*/
 		//stage.setTitle("Genshin Auto Battler");
 		cardSlotX=(int) (bounds.getWidth()/20);
-		cardSlotY=(int) (bounds.getWidth()/15);
-		Image background = new Image("assets/Background.png");
-		gameBoard.setBackground(new Background(new BackgroundImage(background, null, null, null, null)));
+		cardSlotY=(int) (bounds.getWidth()/18);
+		BackgroundSize screenSize = new BackgroundSize(bounds.getWidth(), bounds.getHeight(),true, true, true, false);
+		Image background = new Image("assets/Background13.png");
+	
+		BackgroundPosition center = BackgroundPosition.CENTER;
+		
+		gameBoard.setBackground(new Background(new BackgroundImage(background, null, null, 
+				new BackgroundPosition(center.getHorizontalSide(),center.getHorizontalPosition(),true,Side.BOTTOM,center.getVerticalPosition(),true), screenSize)));
 		title="Auto Battler";
 		startGame();
 		createTopChamp();
@@ -144,8 +154,14 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	public void setMainMenuGUI(StartMenuGUI newGUI) {
 		mainMenuGUI = newGUI;
 	}
+	public void setInscructionPageGUI(InstructionPageUI newGUI) {
+		instructGUI = newGUI;
+	}
 	public void setMainMenuScene(Scene newScene) {
 		mainMenuScene = newScene;
+	}
+	public void setInstructScene(Scene newScene) {
+		instructScene = newScene;
 	}
 	@Override
 	public void start(Stage stage) throws Exception {
@@ -241,6 +257,7 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	}
 
 	private void attackStart() {
+		
 		gameBoard.setTop(topPlayer);
 		gameBoard.setMargin(topPlayer, new Insets(10,10,10,10));
 		controller.AIturn();
@@ -258,7 +275,7 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		topChampions=new CardFieldUI("topChampions",1);
 		topChampions.box = createChampSlots();
 		topChampions.box.setOnMousePressed((event) -> {
-			int childIndex = findChild(event.getX());
+			int childIndex = findChild(event.getSceneX(),false);
 			if (moveCards[0] == null) {
 				Pair pair = new Pair(topChampions.box, 1, childIndex);
 				moveCards[0] = pair;
@@ -283,20 +300,44 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		
 		// saves card when pressed so they can be dragged
 		bottomChampions.box.setOnMousePressed((event) -> {
-			int childIndex = findChild(event.getX());
+			int childIndex = findChild(event.getSceneX(),false);
 			if (moveCards[0] == null) {
 				Pair pair = new Pair(bottomChampions.box, 1, childIndex);
 				moveCards[0] = pair;
-				startingIndex = findChild(event.getX());
+				startingIndex = findChild(event.getSceneX(),false);
 				startingFieldIndex=1;
 			} else {
 				Pair pair = new Pair(bottomChampions.box, 1, childIndex);
 				moveCards[1] = pair;
 				controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
 				moveCards = new Pair[2];
-		
 			}
-
+		});
+		bottomChampions.box.setOnMouseReleased((event)->{	
+			if(moveCards[0]!=null) {
+				// gets index of the mouse is over
+				int childIndex = findChild(event.getSceneX(),false);
+				// gets the index of the field the mouse is over
+				int fieldIndex=findDroppedField(event.getY(),bottomChampions);
+				// if dropped on bench
+				if(fieldIndex==0) {
+					childIndex = findChild(event.getSceneX(),true);
+				}
+				// gets field the mouse is over
+				if(fieldIndex>=0) {
+					CardFieldUI fieldDroppedOn = cardFieldList.get(fieldIndex);
+					if(childIndex<0 || fieldIndex < 0 || moveCards[0].indices[1]<0) {
+						controller.changePosition(moveCards[0].indices, 1, moveCards[0].indices);
+					}
+					// saves the card and the position of what the mouse was over when released
+					Pair pair = new Pair(fieldDroppedOn.box, fieldIndex, childIndex);
+					moveCards[1] = pair;
+					// swaps
+					controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
+					//System.out.println(" -- moving to "+childIndex+" from "+moveCards[0].indices[1]+" in field "+fieldIndex);
+					moveCards = new Pair[2];
+				}
+			}	
 		});
 		
 	}
@@ -352,14 +393,18 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	 * @return tempBox, HBox holds empty spaces for the champion slots
 	 */
 	private HBox createChampSlots() {
-		HBox tempBox = new HBox(8);
+		HBox tempBox = new HBox(10);
 		tempBox.setAlignment(Pos.CENTER);
 		tempBox.setMaxHeight(cardSlotY);
-		
+		tempBox.setMaxWidth(cardSlotX*10);
+		//tempBox.setSpacing(1);
+		tempBox.setBackground(new Background(new BackgroundFill(Color.SADDLEBROWN, null, null)));
+		int height =(int)bounds.getHeight();
 		for (int col = 0; col < 10; col++) {
 			Rectangle placeHolder = new Rectangle(cardSlotX, cardSlotY, Color.TRANSPARENT);
 			StackPane backgroundCard = new StackPane(placeHolder);
-			backgroundCard.setBackground(new Background(new BackgroundFill(Color.SADDLEBROWN, null, null)));
+			backgroundCard.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
+			backgroundCard.setBorder(Border.stroke(Color.rgb(255,234,160)));
 			tempBox.getChildren().add(backgroundCard);
 			
 		}
@@ -374,22 +419,32 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	 * @param click, double that is the x-coordinate of where user clicked
 	 * @return index, int that is the index of what node was clicked.
 	 */
-	private int findChild(double click) {
+	private int findChild(double click, boolean isBench) {
 		int offset =(int) (bounds.getWidth()-(10*(cardSlotX+15)))/2;
 		double start = offset;
-		double end = start+cardSlotX+10;
-		//System.out.println("--- "+click+"  offset = "+offset+" end = "+end+" card = "+cardSlotX);
-		for (int index = 0; index <= 9; index++) {
+		int cardOffset=15;
+		double end = start+cardSlotX+cardOffset;
+		int max=10;
+		// changes offset and max to fit a bench 
+		if(isBench) {
+			offset =(int) (bounds.getWidth()-(15*(cardSlotX)))/2;
+			start = offset;
+			end = start+cardSlotX;
+			max=15;
+			cardOffset=0;
+			//System.out.println("--- "+click+"  start = "+start+" end = "+end+" offset = "+offset+"card = "+cardSlotX);
+		}
+		int index=0;
+		for ( index = 0; index < max; index++) {
 			if (click >= start && click <= end) {
-				//System.out.println(index+"  start = "+start+" end = "+end);
-				if(index==9) {
-					index--;
-				}
+				
 				return index;
 			}
 			start += cardSlotX;
-			end += cardSlotX+10;
+			end += cardSlotX+cardOffset;
 		}
+		//System.out.println(index+"  start = "+start+" end = "+end);
+		//System.out.println(index);
 		return -1;
 
 	}
@@ -463,11 +518,14 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	 */
 	private void createTopPlayer() {
 		topPlayer = new VBox(10);
-		topPlayer.setSpacing(1);
+		
+		topPlayer.setAlignment(Pos.CENTER);
+		//topPlayer.setSpacing(1);
 		topBench = new CardFieldUI("topBench",0);
 		topBench.box = createBench();
 		topBench.box.setOnMousePressed((event) -> {
-			int childIndex = findChild(event.getX());
+			//System.out.println("------------------");
+			int childIndex = findChild(event.getX(),false);
 			if (moveCards[0] == null) {
 				Pair pair = new Pair(topBench.box, 0, childIndex);
 				moveCards[0] = pair;
@@ -480,7 +538,6 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		});
 
 		topStats = createPlayerArea(controller.getP2());
-
 		topPlayer.getChildren().addAll( playerAndItems(topStats), topChampions.box);
 		topPlayer.getChildren().add(step);
 		topPlayer.getChildren().add(endAttack);
@@ -492,17 +549,23 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	 * bench. be more descriptive soon and make it look nice
 	 */
 	private void createBottomPlayer() {
-		bottomPlayer = new VBox(10);
-		bottomPlayer.setSpacing(1);
+		bottomPlayer = new VBox();
+		bottomPlayer.setAlignment(Pos.CENTER);
+		
+		//bottomPlayer.setSpacing(1);
 		bottomBench=new CardFieldUI("bottomBench",0);
 		bottomBench.box = createBench();
-		//bottomBench.box.setAlignment(Pos.CENTER);
+		bottomBench.box.toBack();
+		//bottomBench.box.setAlignment(Pos.CENTER);F
 		// saves card when pressed so they can be dragged
 		bottomBench.box.setOnMousePressed((event) -> {
 			// saves card when pressed
-			int childIndex = findChild(event.getX());
-			if (moveCards[0] == null) {	
-				Pair pair = new Pair(bottomBench.box, 0, childIndex);
+			
+			int childIndex = findChild(event.getSceneX(),true);
+			//System.out.println("selecting "+childIndex);
+			if (moveCards[0] == null) {
+				Pair pair = null;
+				pair = new Pair(bottomBench.box, 0, childIndex);
 				moveCards[0] = pair;
 				startingIndex = childIndex;
 				startingFieldIndex=0;
@@ -513,25 +576,39 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 				moveCards = new Pair[2];
 			}
 		});
-		/*bottomBench.box.setOnMouseClicked((event) -> {
-			// saves card when pressed
-			int childIndex = findChild(event.getX());
-			if (moveCards[0] == null) {	
-				Pair pair = new Pair(bottomBench.box, 0, childIndex);
-				moveCards[0] = pair;
-				//startingIndex = childIndex;
-				//startingFieldIndex=0;
-			} else {
-				Pair pair = new Pair(bottomBench.box, 0, childIndex);
-				moveCards[1] = pair;
-				controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
-				moveCards = new Pair[2];
+		bottomBench.box.setOnMouseReleased((event)->{	
+			if(moveCards[0]!=null) {
+				// gets index of the mouse is over
+				int childIndex = findChild(event.getSceneX(),false);
+				// gets the index of the field the mouse is over
+				int fieldIndex=findDroppedField(event.getY(),bottomBench);
+				if(fieldIndex==0) {
+					// if card dropped on bench
+					//System.out.println("getting from bench");
+					childIndex = findChild(event.getSceneX(),true);
+				}
+				// gets field the mouse is over
+				if(fieldIndex>=0) {
+					CardFieldUI fieldDroppedOn = cardFieldList.get(fieldIndex);
+					// if card dropped on invalid spot
+					if(childIndex<0 || fieldIndex < 0 || moveCards[0].indices[1]<0 || (childIndex>10 && fieldIndex>0)) {		
+						//System.out.println( " tried to swap "+childIndex+" from "+moveCards[0].indices[1]+" in field "+fieldIndex+"  "+fieldDroppedOn.box);
+						controller.changePosition(moveCards[0].indices, 1, moveCards[0].indices);
+					}
+					else {
+						// saves the card and the position of what the mouse was over when released
+						Pair pair = new Pair(fieldDroppedOn.box, fieldIndex, childIndex);
+						moveCards[1] = pair;
+						// swaps
+						controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
+						moveCards = new Pair[2];
+					}
+				}				
 			}
-		});*/
+		});
 		bottomStats = createPlayerArea(controller.getP1());
 		FlowPane bottomCards =playerAndItems(bottomStats);
 		bottomPlayer.getChildren().addAll(bottomChampions.box, bottomCards, bottomBench.box);
-		
 
 	}
 
@@ -552,14 +629,18 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	 */
 	private HBox createBench() {
 		HBox tempBox = new HBox();
+		tempBox.setMaxWidth(cardSlotX*15);
+		//tempBox.toBack();
+		//tempBox.setBackground(new Background(new BackgroundFill(Color.SADDLEBROWN, null, null)));
 		int height =(int)bounds.getHeight();
 		tempBox.setMaxHeight(cardSlotY);
 		tempBox.setAlignment(Pos.CENTER);
+		tempBox.setBorder(Border.stroke(Color.rgb(255,234,160)));
 		for (int col = 0; col < 15; col++) {
 			Rectangle placeHolder = new Rectangle(cardSlotX, cardSlotY, Color.TRANSPARENT);
 			StackPane backgroundCard = new StackPane(placeHolder);
 			backgroundCard.setAlignment(Pos.CENTER);
-			backgroundCard.setBackground(new Background(new BackgroundFill(Color.SADDLEBROWN, null, null)));
+			//backgroundCard.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
 
 			tempBox.getChildren().add(backgroundCard);
 		}
@@ -568,51 +649,68 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	}
 
 	// needs to take champ class card
-	private StackPane createCard(Card champ) {
-			//gets base card pic?
-			int height =(int)bounds.getHeight();
-			String cardName = ("/assets/" + champ.getName().toLowerCase() + "Card.png");
-			Image emptyCard = new Image(cardName);
-			ImageView pic = new ImageView();
-			pic.setPreserveRatio(true);
-			pic.setImage(emptyCard);
-			pic.setFitHeight(cardSlotY);
-			pic.setFitWidth(cardSlotX);
-			
-			//TODO check if this gets correct stats
-			StackPane pane = new StackPane();
-			String attackStr = Integer.toString(champ.getAtk());
-			String hpStr = Integer.toString(champ.getHp());
-			Label hp = new Label(hpStr);
-			hp.setTextFill(Color.BLACK);
-			
-			
+	private StackPane createCard(Card champ, boolean isDraggable) {
+		//gets base card pic?
+		int height =(int)bounds.getHeight();
+		String cardName = ("/assets/" + champ.getName().toLowerCase() + "Card.png");
+		Image emptyCard = new Image(cardName);
+		ImageView pic = new ImageView();
+		pic.setPreserveRatio(true);
+		pic.setImage(emptyCard);
+		pic.setFitHeight(cardSlotY);
+		pic.setFitWidth(cardSlotX);
+		
+		//TODO check if this gets correct stats
+		StackPane pane = new StackPane();
+		String attackStr = Integer.toString(champ.getAtk());
+		String hpStr = Integer.toString(champ.getHp());
+		Label hp = new Label(hpStr);
+		hp.setTextFill(Color.BLACK);
 
-			Label attack = new Label(attackStr);
-			attack.setTextFill(Color.BLACK);
+		Label attack = new Label(attackStr);
+		attack.setTextFill(Color.BLACK);
 
-			Image money = new Image("assets/coin.png");
-			ImageView moneyView = new ImageView(money);
-			moneyView.setPreserveRatio(true);
-			moneyView.setFitHeight(bounds.getHeight()/42);
+		Image money = new Image("assets/coin.png");
+		ImageView moneyView = new ImageView(money);
+		moneyView.setPreserveRatio(true);
+		moneyView.setFitHeight(bounds.getHeight()/42);
 
-			Label moneyText = new Label("" + champ.getPrice());
-			moneyText.setTextFill(Color.YELLOW);
-			moneyText.setOpacity(100);
+		Label moneyText = new Label("" + champ.getPrice());
+		moneyText.setTextFill(Color.YELLOW);
+		moneyText.setOpacity(100);
 
-			pane.setAlignment(Pos.CENTER);
-			pane.getChildren().addAll(pic, hp, attack, moneyView, moneyText);
-			pane.setMargin(attack, new Insets(cardSlotY-28, 5, 0, cardSlotX-35));
-			pane.setMargin(hp, new Insets(cardSlotY-28, cardSlotX-75, 0, 0));	
-			pane.setMargin(moneyView, new Insets(0, bounds.getHeight()/15, cardSlotY-17, 0));
-			pane.setMargin(moneyText, new Insets(0, bounds.getHeight()/30.8, cardSlotY-17, 0));
-			//pane.setMaxHeight(cardSlotY);
-			return pane;
+		pane.setAlignment(Pos.CENTER);
+		pane.getChildren().addAll(pic, hp, attack, moneyView, moneyText);
+		pane.setMargin(attack, new Insets(cardSlotY/1.25, 0, 0, cardSlotX/2));
+		pane.setMargin(hp, new Insets(cardSlotY/1.25, cardSlotX/5, 0, 0));	
+		pane.setMargin(moneyView, new Insets(0, bounds.getHeight()/18, cardSlotY/1.25, 0));
+		pane.setMargin(moneyText, new Insets(0, bounds.getHeight()/35, cardSlotY/1.25, 0));
+		if(isDraggable) {
+			pane.setOnMousePressed(e->{
+				// saves cards current position when pressed
+				int childIndex = findChild(e.getSceneX(),false);
+				startX = e.getSceneX()-pane.getTranslateX();
+				startY = e.getSceneY()-pane.getTranslateY();
+				
+				
+			});
+			// allows card to follow mouse as dragged
+			pane.setOnMouseDragged(e->{ 
+				// moves card to mouse
+				
+				pane.setTranslateX(e.getSceneX()-startX);
+				pane.setTranslateY(e.getSceneY()-startY);
+				pane.setTranslateZ(10);
+				
+			});
 		}
+		//pane.setMaxHeight(cardSlotY);
+		return pane;
+	}
 
 	// how shop is created
 	private void createShop() {
-		shop = new VBox(8);
+		shop = new VBox(10);
 		shop.setAlignment(Pos.CENTER);
 		shop.setPrefHeight(10);
 		shop.setSpacing(1);
@@ -624,14 +722,14 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		cardsForSale.box = createChampSlots();
 		//cardsForSale.box.setMaxHeight(10);
 		for (int index = 0; index < shopArray.length; index++) {
-			StackPane card = createCard(shopArray[index]);
+			StackPane card = createCard(shopArray[index],false);
 			StackPane emptySlot = (StackPane) cardsForSale.box.getChildren().get(index);
 			
 			emptySlot.getChildren().add(card);
 		}
 		// TODO fix this for sure
 		cardsForSale.box.setOnMouseClicked((event) -> {
-			int childIndex = findChild(event.getX());
+			int childIndex = findChild(event.getSceneX(),false);
 			Player p1 = controller.getP1();
 			
 			controller.buyCharacter(p1, childIndex);
@@ -641,21 +739,10 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 			moveCards[0] = shopCards;
 			controller.changePosition(moveCards[0].indices, 2, moveCards[1].indices);
 			moveCards = new Pair[2];
+			//System.out.println("bought card at "+childIndex);
 
 		});
 		HBox shopArea = createShopArea();
-	
-		/*
-		HBox sellArea = createBench();
-	
-		//sellArea.setAlignment(Pos.CENTER);
-		sellArea.setOnMouseClicked((event) -> {
-			if (moveCards[0] != null) {
-				Player p1 = controller.getP1();
-				controller.sellChampion(p1, moveCards[0].indices[0], moveCards[0].indices[1]);
-				moveCards = new Pair[2];
-			}
-		});*/
 		shop.getChildren().addAll(shopArea, cardsForSale.box);
 
 
@@ -680,14 +767,29 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		playerArea.setAlignment(Pos.CENTER);
 		int height=(int) bounds.getHeight();
 		playerArea.setMinHeight(height/10);
-		Image mainMenu = new Image("assets/homeButton.png");
+		playerArea.setSpacing(30);
+		Image mainMenu = new Image("assets/mainMenu.png");
 	    mainMenuView = new ImageView(mainMenu);
 		mainMenuView.setPreserveRatio(true);
+		mainMenuView.setLayoutX(height/20);
+		mainMenuView.setLayoutY(height/20);
 		mainMenuView.setFitHeight(height/20);
-		playerArea.getChildren().add(mainMenuView);
+		
 		mainMenuView.setOnMouseClicked((event) -> {
-			//curStage.close();
+			curStage.close();
 			switchGameView(mainMenuGUI.getScene(),mainMenuGUI.getStage(),mainMenuGUI.getTitle());
+		});
+		playerArea.getChildren().add(mainMenuView);
+		Image instructPage = new Image("assets/helpText.png");
+	    instructView = new ImageView(instructPage);
+	    instructView.setPreserveRatio(true);
+	    instructView.setLayoutX(height/20);
+	    instructView.setLayoutY(height/20);
+	    instructView.setFitHeight(height/20);
+	    
+		instructView.setOnMouseClicked((event) -> {
+			curStage.close();
+			switchGameView(instructGUI.getScene(),instructGUI.getStage(),instructGUI.getTitle());
 		});
 		// controller get traits
 		Image reroll = new Image("assets/rerollBig.png");
@@ -721,6 +823,7 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		cost.setTextFill(Color.YELLOW);
 		playerArea.getChildren().add(cost);
 		playerArea.getChildren().add(turnButton);
+		playerArea.getChildren().add(instructView);
 		//playerArea.setAlignment(Pos.CENTER);
 		// upgrade handler
 		// TODO leveling up rerolls shop
@@ -739,29 +842,28 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	@Override
 	public void update(Observable o, Object arg) {
 		// should add if arg is player 1
-		
 		Player p1 = controller.getP1();
 		Card[] champSlots = p1.getBattleField();
-		remakeHbox(bottomChampions, champSlots);
+		remakeHbox(bottomChampions, champSlots,true);
 
 		Card[] bench = p1.getBench();
-		remakeHbox(bottomBench, bench);
+		remakeHbox(bottomBench, bench,true);
 		changeStats(1);
 		FlowPane fPane = (FlowPane) bottomPlayer.getChildren().get(1);
 		if (!attackPhase) {
 			Card[] shopCards = controller.getShop(p1);
-
-			remakeHbox(cardsForSale, shopCards);
-				
+					
+			remakeHbox(cardsForSale, shopCards, false);
+						
 		}else {
+
 			Player p2 = controller.getP2();
 			Card[] champSlots2 = p2.getBattleField();
-			remakeHbox(topChampions, champSlots2);
-			//remakeHbox(top)
+			remakeHbox(topChampions, champSlots2,false);
 			changeStats(2);
 
 		}
-		
+				
 		if(controller.isGameOver()) {
 			System.out.println("its over");
 			System.exit(0);
@@ -769,8 +871,8 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 
 	}
 
-	private void remakeHbox(CardFieldUI cardArea, Card[] champSlots) {
-
+private void remakeHbox(CardFieldUI cardArea, Card[] champSlots, boolean isDraggable) {
+		
 		for (Node node : cardArea.box.getChildren()) {
 			StackPane pane = (StackPane) node;
 			if (pane.getChildren().size() > 1) {
@@ -781,49 +883,11 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 			if (champSlots[index] == null) {
 				continue;
 			} else {
-				StackPane card = createCard(champSlots[index]);
+				
+				StackPane card = createCard(champSlots[index],isDraggable);
 				StackPane slot = (StackPane) cardArea.box.getChildren().get(index);
 				slot.getChildren().add(card);
 				// allows cards to moved when pressed
-				card.setOnMousePressed(e->{
-					// saves cards current position when pressed
-					int childIndex = findChild(e.getX());
-					startX = e.getSceneX()-card.getTranslateX();
-					startY = e.getSceneY()-card.getTranslateY();
-					
-				});
-				// allows card to follow mouse as dragged
-				card.setOnMouseDragged(e->{ 
-					// moves card to mouse
-					card.setTranslateX(e.getSceneX()-startX);
-					card.setTranslateY(e.getSceneY()-startY);
-					
-				});
-				// mouse is done dragging
-				cardArea.box.setOnMouseReleased((event)->{
-					
-					if(moveCards[0]!=null) {
-						// gets index of the mouse is over
-						int childIndex = findChild(event.getX());
-						// gets the index of the field the mouse is over
-						int fieldIndex=findDroppedField(event.getY(),cardArea);
-						// gets field the mouse is over
-						if(fieldIndex>=0) {
-							CardFieldUI fieldDroppedOn = cardFieldList.get(fieldIndex);
-							//System.out.println("moving to "+childIndex+" from "+moveCards[0].indices[1]+" in field "+fieldIndex);
-							// saves the card and the position of what the mouse was over when released
-							Pair pair = new Pair(fieldDroppedOn.box, fieldIndex, childIndex);
-							moveCards[1] = pair;
-							// swaps
-							controller.changePosition(moveCards[0].indices, 1, moveCards[1].indices);
-							moveCards = new Pair[2];
-						}
-						
-					}
-						
-				});
-				
-				
 			}
 		}
 	}
@@ -874,7 +938,7 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	 * index to a specific child.
 	 *
 	 */
-	private class Pair {
+	public class Pair {
 		public HBox cards;
 		public int[] indices;
 
