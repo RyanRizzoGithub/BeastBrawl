@@ -115,6 +115,10 @@ public class AutoBattlerController{
 		return model.getP2();
 	}
 	
+	public int[][] getCardFight(){
+		return model.getCardInteractions();
+	}
+	
 	public boolean isGameOver() {
 		if (getP1().getHealth() <= 0 || getP2().getHealth() <= 0) {
 			return true;

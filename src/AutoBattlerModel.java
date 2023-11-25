@@ -21,8 +21,8 @@ public class AutoBattlerModel  {
     private final Player p2;
     private int round;
     private int attackRound;
-    private int p1_attack_card;
-    private int p2_attack_card;
+    private int [] attacking_arr;
+    private int [] defending_arr;
     private final PropertyChangeSupport propertyChangeSupport;
     
 
@@ -34,12 +34,20 @@ public class AutoBattlerModel  {
     public AutoBattlerModel() {
         p1 = new Player();
         p2 = new Player();
+        //index [0] will be player, index [1] will be card that is attacking
+        attacking_arr = new int[2];
+        defending_arr = new int[2];
         round = 1;
         Random rng = new Random();
         attackRound = rng.nextInt(2);
-        p1_attack_card = 0;
-        p2_attack_card = 0;
         propertyChangeSupport = new PropertyChangeSupport(this);
+    }
+    
+    public int [][] getCardInteractions(){
+    	int arr [][] = new int [2][1];
+    	arr [0] = attacking_arr;
+    	arr [1] = defending_arr;
+    	return arr;
     }
     
     /*
@@ -79,10 +87,7 @@ public class AutoBattlerModel  {
      * 
      */
     public void attackPhase()  {
-    	p1.incRoundSince();
-    	p2.incRoundSince();
-       // Random rng = new Random();
-        //int attackRound = rng.nextInt(2);
+    	
         if (isRoundOver() == 0) {
         	//if attackround is 0 p1 attacks first
             if (attackRound % 2 == 0) { 
@@ -97,21 +102,11 @@ public class AutoBattlerModel  {
             attackRound++;
             setChanged(); 
             
-            /*
-            synchronized (this) {
-            	try {
-					this.wait();
-				} catch (InterruptedException e) {
-					System.out.println("This thang did not wait");
-					e.printStackTrace();
-				}
-            }*/
-        	//notifyObservers();
 
         } else {
-        
+        p1.incRoundSince();
+        p2.incRoundSince();
         round += 1;
-        
         //p1 won the round
         if (isRoundOver() == 1) {
         	p1.setGold(round);
@@ -125,7 +120,6 @@ public class AutoBattlerModel  {
         	//how they lose health now
         	p1.loseHealth(calculate_damage(p2));
         }
-       // resetChampStats(); i dont think we wanted this called yet
         Random rng = new Random();//wildly inefficent but fix later
         attackRound = rng.nextInt(2);
         setChanged();
@@ -211,10 +205,21 @@ public class AutoBattlerModel  {
      */
     private void findChamps(Player attacking, Player defending) { 
         int i = attacking.get_attack_card();
-        int j;
+        int j = 0;
+        attacking_arr [1] = i;
         Random rng = new Random();
-        System.out.println("This player is attacking" + attacking.toString());
-        System.out.println("This player is defending" + defending.toString());
+        if(attacking.equals(p1)) {
+        	System.out.println("Player 1 is attacking Player 2");
+        	//player 1 is attacking player 2
+        	attacking_arr [0] = 1;
+        	defending_arr [0] = 2;
+        }else {
+        	System.out.println("Player 2 is attacking Player 1");
+        	//player 2 is attacking player 1
+        	attacking_arr [0] = 2;
+        	defending_arr [0] = 1;
+        }
+        
         Card attacker = null;
         Card defender = null;
         //while loop finds current attacker or next available attacker.
@@ -236,6 +241,7 @@ public class AutoBattlerModel  {
             }
             defender = defending.getBattleField()[j];
         }
+        defending_arr[1] = j;
         System.out.println("This is the defender: " + defender.getName());
         int result = executeAttack(attacker, defender); //fix later
         

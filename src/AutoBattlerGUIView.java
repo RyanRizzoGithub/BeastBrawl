@@ -14,6 +14,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import Creatures.Creature;
+import javafx.animation.PathTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -32,9 +33,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class AutoBattlerGUIView extends Application implements Observer, PropertyChangeListener  {
 
@@ -174,11 +180,43 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	    step.setOnMouseClicked((event) ->{
 	    	
 	    	controller.startAttackPhase();
+	    	//System.out.println("This is player 1 card: " + controller.getCardFight()[0][1]);
+	    	//System.out.println("This is player 2 card: " + controller.getCardFight()[1][1]);
+	    	System.out.println(bottomChampions.box.getChildren().toString());
+	    	//animation();
 	    	if (controller.getIsRoundOver() != 0) {
 	    		endAttack.setVisible(true);
 	    		step.setVisible(false);
 	    	}
 	    });
+	}
+	
+	private void animation() {
+		int attacking_card = controller.getCardFight()[0][1];
+		int defending_card = controller.getCardFight()[1][1];
+
+		PathTransition pathT = new PathTransition();
+		//player 1 is attacking player 2
+		if(controller.getCardFight()[0][0] == 1) {
+			double startX = bottomChampions.box.getChildren().get(attacking_card).localToScreen(0,0).getX();
+	        double startY = bottomChampions.box.getChildren().get(attacking_card).localToScreen(0,0).getY();
+	        double endX = topChampions.box.getChildren().get(defending_card).localToScreen(0,0).getX();
+	        double endY = topChampions.box.getChildren().get(defending_card).localToScreen(0,0).getY();
+	        Line line = new Line (startX,startY,endX,endY);
+	        System.out.println("starty: " + startY);
+	        System.out.println("endy: " + endY);
+	        System.out.println("startx: " + startX);
+	        System.out.println("endx: " + endX);
+	        
+	        
+	        pathT.setNode(bottomChampions.box.getChildren().get(attacking_card));
+	        pathT.setPath(line);
+	        pathT.setDuration(Duration.seconds(3));
+	        pathT.setCycleCount(3); // Set to 1 for running only once
+	        pathT.setAutoReverse(true);
+	        pathT.play();
+	       // pathT.pause();
+		}
 	}
 	
 	private void endAttackButton() {
@@ -678,6 +716,10 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		viewUpgrade.setPreserveRatio(true);
 		viewUpgrade.setFitHeight(height/20);
 		playerArea.getChildren().add(viewUpgrade);
+		Label cost = new Label();
+		cost.setText("Upgrade Cost: " + (controller.getP1().getLevel() + 4 - controller.getP1().getRoundsSince()) );
+		cost.setTextFill(Color.YELLOW);
+		playerArea.getChildren().add(cost);
 		playerArea.getChildren().add(turnButton);
 		//playerArea.setAlignment(Pos.CENTER);
 		// upgrade handler
@@ -715,6 +757,7 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 			Player p2 = controller.getP2();
 			Card[] champSlots2 = p2.getBattleField();
 			remakeHbox(topChampions, champSlots2);
+			//remakeHbox(top)
 			changeStats(2);
 
 		}
@@ -796,17 +839,16 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 			Player p1 = controller.getP1();
 			Label money = (Label) bottomStats.getChildren().get(5);
 			money.setText("" + p1.getGold());
-			
-			
 
 			Label hp = (Label) bottomStats.getChildren().get(3);
-			hp.setText("" + p1.getHealth());
+			hp.setText("" + controller.getP1().getHealth());
 		}else if(player == 2) {
+			
 			Player p2 = controller.getP2();
-			Label money = (Label) bottomStats.getChildren().get(5);
+			Label money = (Label) topStats.getChildren().get(5);
 			money.setText("" + p2.getGold());
-			Label hp = (Label) bottomStats.getChildren().get(3);
-			hp.setText("" + p2.getHealth());
+			Label hp = (Label) topStats.getChildren().get(3);
+			hp.setText("" + controller.getP2().getHealth());
 		}
 
 	}

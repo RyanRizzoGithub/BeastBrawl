@@ -102,52 +102,10 @@ public class Player {
         return bench;
     }
     
-    /**
-     * Returns all traits on the battlefield regardless of if they give the 
-     * trait bonus or not
-     * @return a hashmap containing all the traits and how many there are
+  
      
-    public HashMap<String, Integer> getTraits() {
-    	HashMap<String, Integer> map = new HashMap<>();
-    	ArrayList<String> namesAlreadyAdded = new ArrayList<String>();
-    	for (int i = 0; i < 7; i++) {
-    		if (battleField[i] == null) {
-    			continue;
-    			// checks if the map contains the type already and if a champion
-    			// with the same name is already in the map
-
-    		} else if(map.containsKey(battleField[i].getType()) &&
-    				namesAlreadyAdded.contains(battleField[i].getName())){
-
-    			int alreadyIn = map.get(battleField[i].getType());
-        		map.put(battleField[i].getType(), alreadyIn += 1);
-        		namesAlreadyAdded.add(battleField[i].getName());
-    		} else {
-    			map.put(battleField[i].getType(), 1);
-    			namesAlreadyAdded.add(battleField[i].getName());
-    		}
-    	}
-    	return map;
-    } 
+   
     
-    /**
-     * Returns all the traits that can give bonuses on the board
-     * @return a hashmap containing all the traits and how many there are
-     
-    public HashMap<String, Integer> getActiveTraits(){
-    	HashMap<String, Integer> map = getTraits();
-    	HashMap<String, Integer> newMap = new HashMap<>();
-    	// Only gives trait bonus if 3 or more different champions
-    	// of the same typeon battlefield
-    	for (Map.Entry mapElement: map.entrySet()) {
-    		int timesIn = (int) mapElement.getValue();
-    		if (timesIn == 3) {
-    			newMap.put((String) mapElement.getKey(),(int) mapElement.getValue());
-    		}
-    	}
-		return newMap;
-    }
-    */
     /**
      * Allows access to player's champions on the battlefield.
      * @return Array of champions.
@@ -190,7 +148,15 @@ public class Player {
     
     public void incRoundSince() {
     	//bug check later it doesnt go negative
-    	roundsSince += 1;
+    	if(level + 4 - roundsSince == 0) {
+    		//idk
+    	}else {
+    		roundsSince += 1;
+    	}
+    }
+    
+    public int getRoundsSince() {
+    	return roundsSince;
     }
     
     /**
