@@ -39,6 +39,8 @@ public class StartMenuGUI extends Application {
 	private Button startButton;
 	private ImageView startButtonView;
 	private ImageView instructPageView;
+	private WinnerEndScreenGUI winGUI;
+	private LoserEndScreenGUI loseGUI;
 	private Scene mainScene;
 	private Stage stage;
 	private String title;
@@ -89,6 +91,19 @@ public class StartMenuGUI extends Application {
 		instructGUI.setMainGUI(this);
 		instructGUI.setGameGUI(gameGUI);
 		gameGUI.setInscructionPageGUI(instructGUI);
+		
+		loseGUI = new LoserEndScreenGUI(bounds);
+		loseGUI.setBounds(bounds);
+		loseGUI.setMainMenuGUI(this);
+		gameGUI.setLoseGUI(loseGUI);
+		loseGUI.setInscructionPageGUI(instructGUI);
+		winGUI = new WinnerEndScreenGUI(bounds);
+		winGUI.setBounds(bounds);
+		gameGUI.setWinGUI(winGUI);
+		//loseGUI.setBounds(bounds);
+		//loseGUI.setMainMenuGUI(this);
+		//loseGUI.setInscructionPageGUI(instructGUI);
+		
 		BackgroundSize screenSize = new BackgroundSize(bounds.getWidth(), bounds.getHeight(),true, true, true, true);
 		menuPage.setBackground(new Background(new BackgroundImage(background, null, null, null, screenSize)));
 		menuPage.setCenter(menuContents);
@@ -103,6 +118,7 @@ public class StartMenuGUI extends Application {
 		mainScene = new Scene(menuPage);
 		gameGUI.setMainMenuScene(mainScene);
 		instructGUI.setMainScene(mainScene);
+		loseGUI.setMainMenuScene(mainScene);
 		// adds action to start game button
 		startButtonView.setOnMouseClicked(e -> {
 			this.stage.close();

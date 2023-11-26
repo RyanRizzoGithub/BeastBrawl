@@ -71,8 +71,12 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	private Scene gameScene;
 	private Scene mainMenuScene;
 	private Scene instructScene;
+	private Scene loseScene;
+	private Scene winScene;
 	private StartMenuGUI mainMenuGUI;
 	private InstructionPageUI instructGUI;
+	private LoserEndScreenGUI loseGUI;
+	private WinnerEndScreenGUI winGUI;
 	private Stage curStage;
 	private ImageView mainMenuView;
 	private ImageView instructView;
@@ -163,10 +167,27 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	public void setInstructScene(Scene newScene) {
 		instructScene = newScene;
 	}
+	public void setWinScene(Scene newScene) {
+		winScene = newScene;
+	}
+	public void setLoseScene(Scene newScene) {
+		loseScene = newScene;
+	}
+	public void setWinGUI(WinnerEndScreenGUI newGUI) {
+		winGUI = newGUI;
+	}
+	public void setLoseGUI(LoserEndScreenGUI newGUI) {
+		loseGUI = newGUI;
+	}
+	
+	public void setStage(Stage newStage) {
+		curStage = newStage;
+	}
 	@Override
 	public void start(Stage stage) throws Exception {
 		stage.setTitle("Auto Battler");
-		curStage =stage;
+		//curStage =stage;
+		//stage.show();
 
 	}
 
@@ -776,8 +797,11 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		mainMenuView.setFitHeight(height/20);
 		
 		mainMenuView.setOnMouseClicked((event) -> {
+			//Stage temp = curStage;
 			curStage.close();
-			switchGameView(mainMenuGUI.getScene(),mainMenuGUI.getStage(),mainMenuGUI.getTitle());
+			curStage = mainMenuGUI.getStage();
+			//temp.close();
+			switchGameView(mainMenuGUI.getScene(),mainMenuGUI.getStage(),mainMenuGUI.getTitle(),true);
 		});
 		playerArea.getChildren().add(mainMenuView);
 		Image instructPage = new Image("assets/helpText.png");
@@ -789,7 +813,8 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	    
 		instructView.setOnMouseClicked((event) -> {
 			curStage.close();
-			switchGameView(instructGUI.getScene(),instructGUI.getStage(),instructGUI.getTitle());
+			curStage = instructGUI.getStage();
+			switchGameView(instructGUI.getScene(),instructGUI.getStage(),instructGUI.getTitle(),false);
 		});
 		// controller get traits
 		Image reroll = new Image("assets/rerollBig.png");
@@ -844,10 +869,14 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		// should add if arg is player 1
 		Player p1 = controller.getP1();
 		Card[] champSlots = p1.getBattleField();
-		remakeHbox(bottomChampions, champSlots,true);
-
+		boolean movePlayerCards=true;
+		if(attackPhase) {
+			movePlayerCards=false;
+		}
+		remakeHbox(bottomChampions, champSlots,movePlayerCards);
+		
 		Card[] bench = p1.getBench();
-		remakeHbox(bottomBench, bench,true);
+		remakeHbox(bottomBench, bench,movePlayerCards);
 		changeStats(1);
 		FlowPane fPane = (FlowPane) bottomPlayer.getChildren().get(1);
 		if (!attackPhase) {
@@ -856,7 +885,7 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 			remakeHbox(cardsForSale, shopCards, false);
 						
 		}else {
-
+			
 			Player p2 = controller.getP2();
 			Card[] champSlots2 = p2.getBattleField();
 			remakeHbox(topChampions, champSlots2,false);
@@ -866,7 +895,20 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 				
 		if(controller.isGameOver()) {
 			System.out.println("its over");
-			System.exit(0);
+			if(p1!=null) {
+				// if player 1 won
+				if(p1.getPlayerWon()) {
+					curStage.close();
+					switchGameView(winGUI.getScene(),winGUI.getStage(),winGUI.getTitle(),true);
+				}					
+			}
+			// player 1 lost
+			else {
+				curStage.close();
+				switchGameView(loseGUI.getScene(),loseGUI.getStage(),loseGUI.getTitle(),true);
+			}
+			
+			//System.exit(0);
 		}
 
 	}
@@ -921,8 +963,14 @@ private void remakeHbox(CardFieldUI cardArea, Card[] champSlots, boolean isDragg
 		return gameScene;
 	}
 	
-	private void switchGameView(Scene gameScene,Stage stage,String title) {
-		
+	private void switchGameView(Scene gameScene,Stage stage,String title, boolean isFullScreen) {
+		if(isFullScreen) {
+			stage.setX(bounds.getMinX());
+			stage.setY(bounds.getMinY());
+			stage.setWidth(bounds.getWidth());
+			stage.setHeight(bounds.getHeight());
+			stage.setMaxWidth(bounds.getWidth() * 2);
+		}
 		stage.setTitle(title);
 		stage.setScene(gameScene);
 		stage.show();
