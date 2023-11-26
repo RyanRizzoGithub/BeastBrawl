@@ -95,6 +95,15 @@ public class Player {
     }
     
     /**
+     * Increases the player's gold by the given amount.
+     * used when player sells card
+     * @param amount
+     */
+    public void addGold(int amount) {
+    	gold += amount;
+    }
+    
+    /**
      * returns how much gold the player has
      * @return
      */

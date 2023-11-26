@@ -106,8 +106,18 @@ public class AutoBattlerModel  {
             setChanged(); 
             
 
-        } else {
-        p1.incRoundSince();
+        } 
+        
+    	//notifyObservers(null);
+       
+    }
+    
+    /*
+     * Called when the round is over and distributes coins and
+     * damage to player that lost
+     */
+    public void endAttackPhase() {
+    	p1.incRoundSince();
         p2.incRoundSince();
         round += 1;
         //p1 won the round
@@ -126,9 +136,6 @@ public class AutoBattlerModel  {
         Random rng = new Random();//wildly inefficent but fix later
         attackRound = rng.nextInt(2);
         setChanged();
-        }
-    	//notifyObservers(null);
-       
     }
     
     /*
@@ -139,7 +146,7 @@ public class AutoBattlerModel  {
     	// the i might be wrong here?
     	int sum = 0;
     	for(int i = 0; i < 6; i++) {
-    		if(winner.getBattleField()[i] == null) {
+    		if(winner.getBattleField()[i] == null || winner.getBattleField()[i].getHp() == 0) {
     			continue;
     		}else {
     			sum += winner.getBattleField()[i].getPrice();
@@ -208,9 +215,7 @@ public class AutoBattlerModel  {
      */
     private void findChamps(Player attacking, Player defending) { 
         int i = attacking.get_attack_card();
-        System.out.println("This is the slot at start of find champs: " + i);
-        int j = 0;
-        attacking_arr [1] = i;
+        int j = 0; 
         Random rng = new Random();
         if(attacking.equals(p1)) {
         	System.out.println("Player 1 is attacking Player 2");
@@ -229,6 +234,7 @@ public class AutoBattlerModel  {
         //while loop finds current attacker or next available attacker.
         while (attacker == null || attacker.getHp() <= 0) {
             attacker = attacking.getBattleField()[i];
+            attacking_arr [1] = i;
             if (i >= 9)
                 i = 0;
             else
@@ -236,7 +242,7 @@ public class AutoBattlerModel  {
         }
         //sets new attack card position
         attacking.set_attack_card(i);
-        System.out.println("This is the slot at end of find champs: " + i);
+       
         System.out.println("This is the attacker: " + attacker.getName());
         while (defender == null || defender.getHp() <= 0) {
             j = rng.nextInt(9);
@@ -470,14 +476,14 @@ public class AutoBattlerModel  {
     			return;
     		}
     		player.getBench()[index] = null;
-    		player.setGold(toRemove.getPrice());
+    		player.addGold(toRemove.getPrice());
     	} else if (benchOrBattleField == 1) {
     		Card toRemove = player.getBattleField()[index];
     		if (toRemove == null) {
     			return;
     		}
     		player.getBattleField()[index] = null;
-    		player.setGold(toRemove.getPrice());
+    		player.addGold(toRemove.getPrice());
     	}
     	setChanged();
     	//notifyObservers(player);

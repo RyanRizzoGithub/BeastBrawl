@@ -119,6 +119,10 @@ public class AutoBattlerController{
 		return model.getCardInteractions();
 	}
 	
+	public void attackPhaseOver() {
+		model.endAttackPhase();
+	}
+	
 	public boolean isGameOver() {
 		if (getP1().getHealth() <= 0 || getP2().getHealth() <= 0) {
 			return true;

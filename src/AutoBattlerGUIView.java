@@ -230,35 +230,51 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	    	if (controller.getIsRoundOver() != 0) {
 	    		endAttack.setVisible(true);
 	    		step.setVisible(false);
+	    		controller.attackPhaseOver();//so you can see how much health the player took at the end of round
+	    		displayInteractions();//so it shows the last turn
 	    	}
 	    });
 	}
 	
+	/*
+	 * this is how the cards display who is attacking and who is not
+	 */
 	private void displayInteractions() {
 		int attacking_card = controller.getCardFight()[0][1];
 		int defending_card = controller.getCardFight()[1][1];
 
-		PathTransition pathT = new PathTransition();
 		//player 1 is attacking player 2
 		if(controller.getCardFight()[0][0] == 1) {
 			//for card that is attacking
 			StackPane attackRoot = (StackPane) bottomChampions.box.getChildren().get(attacking_card);
+			if(attackRoot.getChildren().size() == 1) {
+				return;
+			}
 			StackPane card = (StackPane) attackRoot.getChildren().get(1);
 			Background attackBack = new Background(new BackgroundFill(Color.LIME, null, null));
 			card.setBackground(attackBack);
 			//for card that is defending
 			StackPane defendRoot = (StackPane) topChampions.box.getChildren().get(defending_card);
+			if(defendRoot.getChildren().size() == 1) {
+				return;
+			}
 			StackPane defendCard = (StackPane) defendRoot.getChildren().get(1);
 			Background defendBack = new Background(new BackgroundFill(Color.RED, null, null));
 			defendCard.setBackground(defendBack);
 		}else {
 			//for card that is attacking
 			StackPane attackRoot = (StackPane) topChampions.box.getChildren().get(attacking_card);
+			if(attackRoot.getChildren().size() == 1) {
+				return;
+			}
 			StackPane card = (StackPane) attackRoot.getChildren().get(1);
 			Background attackBack = new Background(new BackgroundFill(Color.LIME, null, null));
 			card.setBackground(attackBack);
 			//for card that is defending
 			StackPane defendRoot = (StackPane) bottomChampions.box.getChildren().get(defending_card);
+			if(defendRoot.getChildren().size() == 1) {
+				return;
+			}
 			StackPane defendCard = (StackPane) defendRoot.getChildren().get(1);
 			Background defendBack = new Background(new BackgroundFill(Color.RED, null, null));
 			defendCard.setBackground(defendBack);
@@ -271,7 +287,7 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		endAttack.setText("End Attack Phase");
 		endAttack.setTextFill(Color.BLACK);
 		endAttack.setOnMouseClicked((event) -> {
-			controller.startAttackPhase(); //called one more time to distribute coins
+			 //called one more time to distribute coins
 			attackPhase = false;
 			controller.resetChampionStats();
 			System.out.println("attack phase is over here");
