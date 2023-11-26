@@ -243,47 +243,25 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		if(controller.getCardFight()[0][0] == 1) {
 			//for card that is attacking
 			StackPane attackRoot = (StackPane) bottomChampions.box.getChildren().get(attacking_card);
-			//System.out.println(attackRoot.getChildren());
-			//Rectangle rect = new Rectangle(cardSlotX, cardSlotY, Color.AQUA);
-			//attackRoot.getChildren().set(0, rect);
-			
-			//rect.setFill(Color.AQUA);
 			StackPane card = (StackPane) attackRoot.getChildren().get(1);
-			
-			Image sword = new Image("assets/sword.png");
-			ImageView swordView = new ImageView(sword);
-			swordView.setPreserveRatio(true);
-			swordView.setFitHeight(bounds.getHeight()/15);
-			card.getChildren().add(swordView);
-			card.setMargin(swordView, new Insets(0,0, cardSlotY+ 25, 0));
+			Background attackBack = new Background(new BackgroundFill(Color.LIME, null, null));
+			card.setBackground(attackBack);
 			//for card that is defending
 			StackPane defendRoot = (StackPane) topChampions.box.getChildren().get(defending_card);
 			StackPane defendCard = (StackPane) defendRoot.getChildren().get(1);
-			Image shield = new Image ("assets/shield.png");
-			ImageView shieldView = new ImageView(shield);
-			shieldView.setPreserveRatio(true);
-			shieldView.setFitHeight(bounds.getHeight()/37);
-			defendCard.getChildren().add(shieldView);
-			defendCard.setMargin(shieldView, new Insets(0,0, cardSlotY + 20, 0));
+			Background defendBack = new Background(new BackgroundFill(Color.RED, null, null));
+			defendCard.setBackground(defendBack);
 		}else {
 			//for card that is attacking
 			StackPane attackRoot = (StackPane) topChampions.box.getChildren().get(attacking_card);
 			StackPane card = (StackPane) attackRoot.getChildren().get(1);
-			Image sword = new Image("assets/sword.png");
-			ImageView swordView = new ImageView(sword);
-			swordView.setPreserveRatio(true);
-			swordView.setFitHeight(bounds.getHeight()/15);
-			card.getChildren().add(swordView);
-			card.setMargin(swordView, new Insets(0,0, cardSlotY + 25, 0));
+			Background attackBack = new Background(new BackgroundFill(Color.LIME, null, null));
+			card.setBackground(attackBack);
 			//for card that is defending
 			StackPane defendRoot = (StackPane) bottomChampions.box.getChildren().get(defending_card);
 			StackPane defendCard = (StackPane) defendRoot.getChildren().get(1);
-			Image shield = new Image ("assets/shield.png");
-			ImageView shieldView = new ImageView(shield);
-			shieldView.setPreserveRatio(true);
-			shieldView.setFitHeight(bounds.getHeight()/37);
-			defendCard.getChildren().add(shieldView);
-			defendCard.setMargin(shieldView, new Insets(0,0, cardSlotY + 20, 0));
+			Background defendBack = new Background(new BackgroundFill(Color.RED, null, null));
+			defendCard.setBackground(defendBack);
 		}
 	}
 	

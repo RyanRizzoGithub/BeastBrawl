@@ -208,6 +208,7 @@ public class AutoBattlerModel  {
      */
     private void findChamps(Player attacking, Player defending) { 
         int i = attacking.get_attack_card();
+        System.out.println("This is the slot at start of find champs: " + i);
         int j = 0;
         attacking_arr [1] = i;
         Random rng = new Random();
@@ -235,6 +236,7 @@ public class AutoBattlerModel  {
         }
         //sets new attack card position
         attacking.set_attack_card(i);
+        System.out.println("This is the slot at end of find champs: " + i);
         System.out.println("This is the attacker: " + attacker.getName());
         while (defender == null || defender.getHp() <= 0) {
             j = rng.nextInt(9);
