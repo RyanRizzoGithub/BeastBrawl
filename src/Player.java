@@ -188,9 +188,9 @@ public class Player {
     		int i = 0;
             while (bench[i] != null)
                 i++;
-        	if (i <= 7 && toBuy != null) {
+        	if (i <= 14 && toBuy != null) {
         		//gold >= toBuy.getPrice()
-        		if (true) {
+        		if (gold >= toBuy.getPrice()) {
         			bench[i] = toBuy;
         			spendGold(toBuy.getPrice());
         			shop.getShop()[index] = null;

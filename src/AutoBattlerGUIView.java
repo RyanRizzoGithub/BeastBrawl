@@ -225,8 +225,8 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	    	controller.startAttackPhase();
 	    	//System.out.println("This is player 1 card: " + controller.getCardFight()[0][1]);
 	    	//System.out.println("This is player 2 card: " + controller.getCardFight()[1][1]);
-	    	System.out.println(bottomChampions.box.getChildren().toString());
-	    	//animation();
+	    	//System.out.println(bottomChampions.box.getChildren().toString());
+	    	displayInteractions();
 	    	if (controller.getIsRoundOver() != 0) {
 	    		endAttack.setVisible(true);
 	    		step.setVisible(false);
@@ -234,31 +234,56 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	    });
 	}
 	
-	private void animation() {
+	private void displayInteractions() {
 		int attacking_card = controller.getCardFight()[0][1];
 		int defending_card = controller.getCardFight()[1][1];
 
 		PathTransition pathT = new PathTransition();
 		//player 1 is attacking player 2
 		if(controller.getCardFight()[0][0] == 1) {
-			double startX = bottomChampions.box.getChildren().get(attacking_card).localToScreen(0,0).getX();
-	        double startY = bottomChampions.box.getChildren().get(attacking_card).localToScreen(0,0).getY();
-	        double endX = topChampions.box.getChildren().get(defending_card).localToScreen(0,0).getX();
-	        double endY = topChampions.box.getChildren().get(defending_card).localToScreen(0,0).getY();
-	        Line line = new Line (startX,startY,endX,endY);
-	        System.out.println("starty: " + startY);
-	        System.out.println("endy: " + endY);
-	        System.out.println("startx: " + startX);
-	        System.out.println("endx: " + endX);
-	        
-	        
-	        pathT.setNode(bottomChampions.box.getChildren().get(attacking_card));
-	        pathT.setPath(line);
-	        pathT.setDuration(Duration.seconds(3));
-	        pathT.setCycleCount(3); // Set to 1 for running only once
-	        pathT.setAutoReverse(true);
-	        pathT.play();
-	       // pathT.pause();
+			//for card that is attacking
+			StackPane attackRoot = (StackPane) bottomChampions.box.getChildren().get(attacking_card);
+			//System.out.println(attackRoot.getChildren());
+			//Rectangle rect = new Rectangle(cardSlotX, cardSlotY, Color.AQUA);
+			//attackRoot.getChildren().set(0, rect);
+			
+			//rect.setFill(Color.AQUA);
+			StackPane card = (StackPane) attackRoot.getChildren().get(1);
+			
+			Image sword = new Image("assets/sword.png");
+			ImageView swordView = new ImageView(sword);
+			swordView.setPreserveRatio(true);
+			swordView.setFitHeight(bounds.getHeight()/15);
+			card.getChildren().add(swordView);
+			card.setMargin(swordView, new Insets(0,0, cardSlotY+ 25, 0));
+			//for card that is defending
+			StackPane defendRoot = (StackPane) topChampions.box.getChildren().get(defending_card);
+			StackPane defendCard = (StackPane) defendRoot.getChildren().get(1);
+			Image shield = new Image ("assets/shield.png");
+			ImageView shieldView = new ImageView(shield);
+			shieldView.setPreserveRatio(true);
+			shieldView.setFitHeight(bounds.getHeight()/37);
+			defendCard.getChildren().add(shieldView);
+			defendCard.setMargin(shieldView, new Insets(0,0, cardSlotY + 20, 0));
+		}else {
+			//for card that is attacking
+			StackPane attackRoot = (StackPane) topChampions.box.getChildren().get(attacking_card);
+			StackPane card = (StackPane) attackRoot.getChildren().get(1);
+			Image sword = new Image("assets/sword.png");
+			ImageView swordView = new ImageView(sword);
+			swordView.setPreserveRatio(true);
+			swordView.setFitHeight(bounds.getHeight()/15);
+			card.getChildren().add(swordView);
+			card.setMargin(swordView, new Insets(0,0, cardSlotY + 25, 0));
+			//for card that is defending
+			StackPane defendRoot = (StackPane) bottomChampions.box.getChildren().get(defending_card);
+			StackPane defendCard = (StackPane) defendRoot.getChildren().get(1);
+			Image shield = new Image ("assets/shield.png");
+			ImageView shieldView = new ImageView(shield);
+			shieldView.setPreserveRatio(true);
+			shieldView.setFitHeight(bounds.getHeight()/37);
+			defendCard.getChildren().add(shieldView);
+			defendCard.setMargin(shieldView, new Insets(0,0, cardSlotY + 20, 0));
 		}
 	}
 	
@@ -353,7 +378,14 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 				// gets field the mouse is over
 				if(fieldIndex>=0) {
 					CardFieldUI fieldDroppedOn = cardFieldList.get(fieldIndex);
-					if(childIndex<0 || fieldIndex < 0 || moveCards[0].indices[1]<0) {
+					//sell cards
+					if(fieldIndex == 4) { //maybe ask paolo if this messes everything up
+						Player p1 = controller.getP1();
+						controller.sellChampion(p1, moveCards[0].indices[0], moveCards[0].indices[1]);
+						moveCards = new Pair[2];
+						return; //maybe works
+					}
+					else if(childIndex<0 || fieldIndex < 0 || moveCards[0].indices[1]<0) {
 						controller.changePosition(moveCards[0].indices, 1, moveCards[0].indices);
 					}
 					// saves the card and the position of what the mouse was over when released
@@ -608,6 +640,7 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 			}
 		});
 		bottomBench.box.setOnMouseReleased((event)->{	
+			//System.out.println(cardFieldList.get(0).name);
 			if(moveCards[0]!=null) {
 				// gets index of the mouse is over
 				int childIndex = findChild(event.getSceneX(),false);
@@ -619,10 +652,17 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 					childIndex = findChild(event.getSceneX(),true);
 				}
 				// gets field the mouse is over
+				
 				if(fieldIndex>=0) {
 					CardFieldUI fieldDroppedOn = cardFieldList.get(fieldIndex);
+					//sell card if card dropped on top player stuff
+					if(fieldIndex == 4) { //maybe ask paolo if this messes everything up
+						Player p1 = controller.getP1();
+						controller.sellChampion(p1, moveCards[0].indices[0], moveCards[0].indices[1]);
+						moveCards = new Pair[2];
+					}
 					// if card dropped on invalid spot
-					if(childIndex<0 || fieldIndex < 0 || moveCards[0].indices[1]<0 || (childIndex>10 && fieldIndex>0)) {		
+					else if(childIndex<0 || fieldIndex < 0 || moveCards[0].indices[1]<0 || (childIndex>10 && fieldIndex>0)) {		
 						//System.out.println( " tried to swap "+childIndex+" from "+moveCards[0].indices[1]+" in field "+fieldIndex+"  "+fieldDroppedOn.box);
 						controller.changePosition(moveCards[0].indices, 1, moveCards[0].indices);
 					}
@@ -772,6 +812,11 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 			moveCards = new Pair[2];
 			//System.out.println("bought card at "+childIndex);
 
+		});
+		cardsForSale.box.setOnDragDropped((event) ->
+		{
+		System.out.println("This event happend");	
+		
 		});
 		HBox shopArea = createShopArea();
 		shop.getChildren().addAll(shopArea, cardsForSale.box);
