@@ -68,21 +68,15 @@ public class InstructionPageUI {
 		instructMenuBar.getChildren().add(exitButtomView);
 		instructMenuBar.setSpacing(30);
 		// sets Instruction text
-		Text instructTexts = new Text("Step 1:--------\n"
-				+ "Step 2--------\n"
-				+ "Step 3:--------\n"
-				+ "Step 4:--------\n"
-				+ "Step 5:--------\n");
-		
-		instructTexts.setFont(new Font("Arial", 50));
-		instructTexts.setFill(Color.WHITE);
+		Image instructPic = new Image("assets/instructionPage.png");
+        ImageView instructView = new ImageView(instructPic);
+        instructView.setPreserveRatio(true);
 		// sets background image
 		BackgroundSize screenSize = new BackgroundSize(bounds.getWidth(), bounds.getHeight(),true, true, true, true);
 		instructPage.setBackground(new Background(new BackgroundImage(background, null, null, null, screenSize)));
 		// sets placement of menu bar and text
 		instructPage.setTop(instructMenuBar);
-		instructPage.setCenter(instructTexts);
-		instructTexts.setTextAlignment(TextAlignment.LEFT);
+		instructPage.setCenter(instructView);
 		instructMenuBar.setAlignment(Pos.CENTER);
 		// adds actions to exit button to close page 
 		exitButtomView.setOnMouseClicked(e -> {
