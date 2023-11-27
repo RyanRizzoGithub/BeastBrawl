@@ -303,11 +303,29 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	}
 
 	private void attackStart() {
-		
 		gameBoard.setTop(topPlayer);
 		gameBoard.setMargin(topPlayer, new Insets(10,10,10,10));
 		controller.AIturn();
-		
+	    step.setVisible(false);
+	    step.setDisable(false);
+	    while (!step.isDisable()) {
+	        try {
+	            Thread.sleep(1000);
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
+	        controller.startAttackPhase();
+            //System.out.println("This is player 1 card: " + controller.getCardFight()[0][1]);
+            //System.out.println("This is player 2 card: " + controller.getCardFight()[1][1]);
+            //System.out.println(bottomChampions.box.getChildren().toString());
+            displayInteractions();
+            if (controller.getIsRoundOver() != 0) {
+                endAttack.setVisible(true);
+                step.setVisible(false);
+                controller.attackPhaseOver();//so you can see how much health the player took at the end of round
+                displayInteractions();//so it shows the last turn
+            }
+	    }
 
 	}
 
