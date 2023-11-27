@@ -42,6 +42,7 @@ public class WinnerEndScreenGUI extends Application {
 		private StartMenuGUI mainMenuGUI;
 		private InstructionPageUI instructGUI;
 		private Scene scene;
+		private AutoBattlerGUIView gameGUI;
 		
 		public WinnerEndScreenGUI(Rectangle2D bounds) {
 			this.bounds=bounds;
@@ -117,11 +118,11 @@ public class WinnerEndScreenGUI extends Application {
 		    @Override
 		    public void handle(ActionEvent event) {
 		    	
-		    	StartMenuGUI startGUI = new StartMenuGUI();
-		    	Stage newStage = new Stage();
 		    	try {
-					startGUI.start(newStage);
-					stage.close();
+		    		gameGUI.updateGUI();
+		    		stage.close();
+		    		//gameGUI.updateGUI();
+		    		switchGameView(mainMenuGUI.getScene(),mainMenuGUI.getStage(),mainMenuGUI.getTitle());
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -131,12 +132,13 @@ public class WinnerEndScreenGUI extends Application {
 		EventHandler<ActionEvent> playAgainButtonHandler = new EventHandler<ActionEvent>() {
 		    @Override
 		    public void handle(ActionEvent event) {
-		    	Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
-		    	AutoBattlerGUIView gameGUI = new AutoBattlerGUIView(bounds);
-		    	Stage newStage = new Stage();
+	
 		    	try {
-					gameGUI.start(newStage);
-					stage.close();
+		    		gameGUI.updateGUI();
+		    		stage.close();
+		    		mainMenuGUI.getStage().close();
+		    		//gameGUI.updateGUI();
+		    		switchGameView(gameGUI.getScene(),gameGUI.getStage(),gameGUI.getTitle());
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -146,7 +148,7 @@ public class WinnerEndScreenGUI extends Application {
 		EventHandler<ActionEvent> closeGameButtonHandler = new EventHandler<ActionEvent>() {
 		    @Override
 		    public void handle(ActionEvent event) {
-				stage.close();
+		    	System.exit(0);
 		    }
 		};
 		
@@ -175,6 +177,9 @@ public class WinnerEndScreenGUI extends Application {
 		}
 		public String getTitle() {
 			return title;
+		}
+		public void setGameGUI(AutoBattlerGUIView gameGUI) {
+			this.gameGUI=gameGUI;
 		}
 		private void switchGameView(Scene gameScene,Stage stage,String title) {
 			   stage.setX(bounds.getMinX());

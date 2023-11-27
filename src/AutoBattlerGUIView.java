@@ -935,6 +935,10 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 
 	@Override
 	public void update(Observable o, Object arg) {
+		updateGUI();
+	}
+	
+	public void updateGUI() {
 		// should add if arg is player 1
 		Player p1 = controller.getP1();
 		Card[] champSlots = p1.getBattleField();
@@ -967,20 +971,27 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 			if(p1!=null) {
 				// if player 1 won
 				if(p1.getPlayerWon()) {
+					System.out.println("won");
 					curStage.close();
 					switchGameView(winGUI.getScene(),winGUI.getStage(),winGUI.getTitle(),true);
 				}					
 			}
 			// player 1 lost
 			else {
+				System.out.println("lost");
 				curStage.close();
 				switchGameView(loseGUI.getScene(),loseGUI.getStage(),loseGUI.getTitle(),true);
 			}
+			
+			model = new AutoBattlerModel();
+			model.addObserver(this); //this is how you win the bitches
+			controller = new AutoBattlerController(model);
 			
 			//System.exit(0);
 		}
 
 	}
+	
 
 private void remakeHbox(CardFieldUI cardArea, Card[] champSlots, boolean isDraggable) {
 		
@@ -1030,6 +1041,9 @@ private void remakeHbox(CardFieldUI cardArea, Card[] champSlots, boolean isDragg
 	public Scene getScene() {
 		// TODO Auto-generated method stub
 		return gameScene;
+	}
+	public Stage getStage() {
+		return curStage;
 	}
 	
 	private void switchGameView(Scene gameScene,Stage stage,String title, boolean isFullScreen) {
