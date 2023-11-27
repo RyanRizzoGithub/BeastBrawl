@@ -324,6 +324,7 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
                 step.setVisible(false);
                 controller.attackPhaseOver();//so you can see how much health the player took at the end of round
                 displayInteractions();//so it shows the last turn
+                step.setDisable(true);
             }
 	    }
 
