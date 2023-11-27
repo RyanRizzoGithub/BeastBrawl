@@ -982,21 +982,24 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 				switchGameView(loseGUI.getScene(),loseGUI.getStage(),loseGUI.getTitle(),true);
 			}
 			
-			model = new AutoBattlerModel();
-			model.addObserver(this); //this is how you win the bitches
-			controller = new AutoBattlerController(model);
-			attackPhase = false;
-			controller.resetChampionStats();
-			System.out.println("attack phase is over here");
-			startGame();
-			createShop();
-			gameBoard.setTop(shop);
-			gameBoard.setMargin(shop, new Insets(10,10,10,10));
-			step.setVisible(true);
-			endAttack.setVisible(false);
+			resetGame();
 			//System.exit(0);
 		}
 
+	}
+	public void resetGame() {
+		model = new AutoBattlerModel();
+		model.addObserver(this); //this is how you win the bitches
+		controller = new AutoBattlerController(model);
+		attackPhase = false;
+		controller.resetChampionStats();
+		System.out.println("attack phase is over here");
+		startGame();
+		createShop();
+		gameBoard.setTop(shop);
+		gameBoard.setMargin(shop, new Insets(10,10,10,10));
+		step.setVisible(true);
+		endAttack.setVisible(false);
 	}
 	
 
