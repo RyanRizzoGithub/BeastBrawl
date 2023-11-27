@@ -111,7 +111,7 @@ public class WinnerEndScreenGUI extends Application {
 		
 		@Override
 		public void start(Stage stage) throws Exception {
-			;
+			
 		} 
 		
 		EventHandler<ActionEvent> menuButtonHandler = new EventHandler<ActionEvent>() {

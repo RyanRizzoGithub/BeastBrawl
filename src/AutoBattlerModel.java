@@ -25,6 +25,7 @@ public class AutoBattlerModel  {
     private int [] defending_arr;
     private PropertyChangeSupport propertyChangeSupport;
     private int AIroundsSince;
+    private int difficulty;
     boolean debug = true;
     
 
@@ -44,6 +45,7 @@ public class AutoBattlerModel  {
         attackRound = rng.nextInt(2);
         propertyChangeSupport = new PropertyChangeSupport(this);
         AIroundsSince = 0;
+        difficulty = 0;
     }
     public void startNewGame() {
     	p1 = new Player();
@@ -509,82 +511,172 @@ public class AutoBattlerModel  {
      * makes an AI turn
      */
     public void AIturn() {
-    	if (debug) System.out.println("AIturn()");
-
-    	// Check if we can level up
-		if (!aiLevelUp(round)) {
-			// Create a shop selection
-			Card[] selection = p2.getShop().getShop();
-			if(selection.length>0) {
-			// Buy the best card in the shop (based on hp + atk)
-			int bestBuy = 0;
-			for (int i=0; i<selection.length; i++) {
-				if (selection[i].getHp() + selection[i].getAtk() > 
-				selection[bestBuy].getHp() + selection[bestBuy].getAtk()) {
-					bestBuy = i;
+if (debug) System.out.println("\nAIturn()");
+    	
+    	if (difficulty == 0) {
+    		// Attempt to level up
+    		if (AIroundsSince >= 5) {
+    			aiLevelUp(round);
+    		}
+    		// Buy a random card
+    		else {
+    			Card[] selection = p2.getShop().getShop();
+    			aiBuyCard(selection, 0);
+    		}
+    		// Sell a random card
+    		int battleCount = 0;
+    		for (int i=0; i<p2.getBattleField().length; i++) {
+    			if (p2.getBattleField()[i] != null) {
+    				battleCount++;
+    			}
+    		}
+    		int handCount = 0;
+			for (int i=0; i<p2.getBench().length; i++) {
+				if (p2.getBench()[i] != null) {
+					handCount++;
 				}
 			}
-			aiBuyCard(selection, bestBuy);
+    		if (battleCount == 10 && handCount > 0) {
+    			aiSellCard(0);
+    		}
+    		
+    		// Play a random card
+    		if (handCount > 0) {
+	    		for (int j=0; j<p2.getBattleField().length; j++) {
+					if (p2.getBattleField()[j] == null) {
+						for (int i=0; i<p2.getBench().length; i++) {
+							if (p2.getBench()[i] != null) {
+								p2.getBattleField()[j] = p2.getBench()[i];
+								p2.getBench()[i] = null;
+								break;
+							}
+						}
+						break;
+					}
+				}
+    		}
+    		AIroundsSince++;
+			setChanged();
+    		
+    	}
+    	
+    	if (difficulty == 1) {
+    		// Buy a random card
+    		if (!aiLevelUp(round)) {
+    			Card[] selection = p2.getShop().getShop();
+    			aiBuyCard(selection, 0);
+    		}
+    		// Sell a random card
+    		int battleCount = 0;
+    		for (int i=0; i<p2.getBattleField().length; i++) {
+    			if (p2.getBattleField()[i] != null) {
+    				battleCount++;
+    			}
+    		}
+    		int handCount = 0;
+			for (int i=0; i<p2.getBench().length; i++) {
+				if (p2.getBench()[i] != null) {
+					handCount++;
+				}
 			}
-		}
-		
-		// Determine if we should sell any cards
-		int battleCount = 0;
-		for (int i=0; i<p2.getBattleField().length; i++) {
-			if (p2.getBattleField()[i] != null) {
-				battleCount++;
+    		if (battleCount == 10 && handCount > 0) {
+    			aiSellCard(0);
+    		}
+    		
+    		// Play a random card
+    		if (handCount > 0) {
+	    		for (int j=0; j<p2.getBattleField().length; j++) {
+					if (p2.getBattleField()[j] == null) {
+						for (int i=0; i<p2.getBench().length; i++) {
+							if (p2.getBench()[i] != null) {
+								p2.getBattleField()[j] = p2.getBench()[i];
+								p2.getBench()[i] = null;
+								break;
+							}
+						}
+						break;
+					}
+				}
+    		}
+    		AIroundsSince++;
+			setChanged();
+    	}
+    	
+    	if (difficulty == 2) {
+    		System.out.println("oops");
+	    	// Check if we can level up
+			if (!aiLevelUp(round)) {
+				// Create a shop selection
+				Card[] selection = p2.getShop().getShop();
+				
+				// Buy the best card in the shop (based on hp + atk)
+				int bestBuy = 0;
+				for (int i=0; i<selection.length; i++) {
+					if (selection[i].getHp() + selection[i].getAtk() > 
+					selection[bestBuy].getHp() + selection[bestBuy].getAtk()) {
+						bestBuy = i;
+					}
+				}
+				aiBuyCard(selection, bestBuy);
 			}
-		}
-		int handCount = 0;
-		for (int i=0; i<p2.getBench().length; i++) {
-			if (p2.getBench()[i] != null) {
-				handCount++;
-			}
-		}
-		if (battleCount == 10 && handCount > 0) {
-			// Sell our worst card (based on hp + atk)
-			int bestSell = 0;
+			
+			// Determine if we should sell any cards
+			int battleCount = 0;
 			for (int i=0; i<p2.getBattleField().length; i++) {
 				if (p2.getBattleField()[i] != null) {
-					if (p2.getBattleField()[i].getHp() + p2.getBattleField()[i].getAtk() < 
-							p2.getBattleField()[bestSell].getHp() + p2.getBattleField()[bestSell].getAtk()) {
-						bestSell = i;
+					battleCount++;
+				}
+			}
+			int handCount = 0;
+			for (int i=0; i<p2.getBench().length; i++) {
+				if (p2.getBench()[i] != null) {
+					handCount++;
+				}
+			}
+			if (battleCount == 10 && handCount > 0) {
+				// Sell our worst card (based on hp + atk)
+				int bestSell = 0;
+				for (int i=0; i<p2.getBattleField().length; i++) {
+					if (p2.getBattleField()[i] != null) {
+						if (p2.getBattleField()[i].getHp() + p2.getBattleField()[i].getAtk() < 
+								p2.getBattleField()[bestSell].getHp() + p2.getBattleField()[bestSell].getAtk()) {
+							bestSell = i;
+						}
 					}
 				}
+			aiSellCard(bestSell);
 			}
-		aiSellCard(bestSell);
-		}
-		
-		// Play the best card
-		if (handCount > 0) {
-			int bestPlay = 0;
-			for (int i=0; i<p2.getBench().length; i++) {
-				if (p2.getBench()[i] != null) {
-					bestPlay = i;
-					break;
-				}
-			}
-			for (int i=0; i<p2.getBench().length; i++) {
-				if (p2.getBench()[i] != null) {
-					if (p2.getBench()[i].getHp() + p2.getBench()[i].getAtk() > 
-					p2.getBench()[bestPlay].getHp() + p2.getBench()[bestPlay].getAtk()) {
+			
+			// Play the best card
+			if (handCount > 0) {
+				int bestPlay = 0;
+				for (int i=0; i<p2.getBench().length; i++) {
+					if (p2.getBench()[i] != null) {
 						bestPlay = i;
+						break;
 					}
 				}
-			}
-			//aiPlayCard(bestPlay);
-			System.out.println("AI Playing [" + p2.getBench()[bestPlay].getName() + "]");
-			for (int j=0; j<p2.getBattleField().length; j++) {
-				if (p2.getBattleField()[j] == null) {
-					p2.getBattleField()[j] = p2.getBench()[bestPlay];
-					p2.getBench()[bestPlay] = null;
-					break;
+				for (int i=0; i<p2.getBench().length; i++) {
+					if (p2.getBench()[i] != null) {
+						if (p2.getBench()[i].getHp() + p2.getBench()[i].getAtk() > 
+						p2.getBench()[bestPlay].getHp() + p2.getBench()[bestPlay].getAtk()) {
+							bestPlay = i;
+						}
+					}
 				}
+				System.out.println("AI Playing [" + p2.getBench()[bestPlay].getName() + "]");
+				for (int j=0; j<p2.getBattleField().length; j++) {
+					if (p2.getBattleField()[j] == null) {
+						p2.getBattleField()[j] = p2.getBench()[bestPlay];
+						p2.getBench()[bestPlay] = null;
+						break;
+					}
+				}
+				setChanged();
 			}
-			setChanged();
-		}
-		AIroundsSince++;
-		System.out.println("AI balance: " + p2.getGold());
+			AIroundsSince++;
+			System.out.println("AI balance: " + p2.getGold());
+    	}
     }
     
     private boolean aiLevelUp(int round) {
@@ -638,6 +730,10 @@ public class AutoBattlerModel  {
 		}
 		
 	}
+    
+    public void setDifficulty(int difficulty) {
+    	this.difficulty = difficulty;
+    }
     
     /**
      * returns the index of the first Champion on a players bench, if 

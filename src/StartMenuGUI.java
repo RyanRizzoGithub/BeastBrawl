@@ -14,6 +14,8 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
@@ -39,6 +41,9 @@ public class StartMenuGUI extends Application {
 	private Button startButton;
 	private Button instructButton;
 	private Button closeButton;
+	private RadioButton easyButton;
+	private RadioButton normalButton;
+	private RadioButton hardButton;
 	private ImageView startButtonView;
 	private ImageView instructPageView;
 	private ImageView closeButtonView;
@@ -48,10 +53,13 @@ public class StartMenuGUI extends Application {
 	private Stage stage;
 	private String title;
 	private int buttonScale;
+	private int difficulty;
+	
 	public StartMenuGUI() {
 		menuPage = new BorderPane();
 		Image background = new Image("assets/Background.png");
 		buttonScale= 35;
+		difficulty = 0;
 		
 		menuPage.setMinWidth(800);
 		menuPage.setMinHeight(700);
@@ -59,7 +67,24 @@ public class StartMenuGUI extends Application {
 		Canvas startCanvas = new Canvas();
 		startCanvas.getGraphicsContext2D().setImageSmoothing(false);
 		title ="Main Menu";
-		//creates start button
+		
+		Image easyImage = new Image("assets/easy.png");
+		easyButton = new RadioButton(); 
+		easyButton.setGraphic(new ImageView(easyImage));
+		easyButton.setSelected(true);
+		
+		Image normalImage = new Image("assets/normal.png");
+	    normalButton = new RadioButton(); 
+	    normalButton.setGraphic(new ImageView(normalImage));
+	    
+	    Image hardImage = new Image("assets/hard.png");
+	    hardButton = new RadioButton();
+	    hardButton.setGraphic(new ImageView(hardImage));
+	    
+	    ToggleGroup tg = new ToggleGroup(); 
+		easyButton.setToggleGroup(tg);
+		normalButton.setToggleGroup(tg);
+		hardButton.setToggleGroup(tg);
 		
 		startButton = new Button();
 		Image startImage = new Image("assets/startGame.png");
@@ -99,6 +124,9 @@ public class StartMenuGUI extends Application {
 		gameTitle.setFill(Color.WHITE);
 		
 		menuContents.getChildren().add(titleView);
+		menuContents.getChildren().add(easyButton);
+		menuContents.getChildren().add(normalButton);
+		menuContents.getChildren().add(hardButton);
 		menuContents.getChildren().add(startButton);
 		menuContents.getChildren().add(closeButton);
 		menuContents.getChildren().add(instructButton);
@@ -157,6 +185,24 @@ public class StartMenuGUI extends Application {
 		
 		closeButton.setOnMouseClicked(e ->{
 			this.stage.close();
+		});
+		
+		easyButton.setOnMouseClicked(e ->{
+			System.out.println("Easy Difficulty Selected");
+			this.difficulty = 0;
+			gameGUI.setDifficulty(difficulty);
+		});
+		
+		normalButton.setOnMouseClicked(e ->{
+			System.out.println("Normal Difficulty Selected");
+			this.difficulty = 1;
+			gameGUI.setDifficulty(difficulty);
+		});
+		
+		hardButton.setOnMouseClicked(e ->{
+			System.out.println("Hard Difficulty Selected");
+			this.difficulty = 2;
+			gameGUI.setDifficulty(difficulty);
 		});
 		
 		stage.setScene(mainScene);

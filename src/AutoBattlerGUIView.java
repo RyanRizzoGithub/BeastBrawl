@@ -27,7 +27,10 @@ import javafx.geometry.Rectangle2D;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -85,9 +88,11 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	private int cardSlotY;
 	private int champFieldX;
 	private int playerImageY;
+	private int difficulty;
 	private Button turnButton;
 	private Button step;
 	private Button endAttack;
+	private Button breakGame;
 	
 	public AutoBattlerGUIView(Rectangle2D bounds) {
 		model = new AutoBattlerModel();
@@ -97,7 +102,7 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		stepButton();
 		endAttackButton();
 		
-		
+		difficulty = 0;
 		moveCards = new Pair[2];
 		moveCardsClicked = new Pair[2];
 		attackPhase = false;
@@ -212,6 +217,33 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 			Platform.runLater(() -> attackStart());
 			
 		});
+		
+
+		breakGame = new Button();
+		breakGame.setTextFill(Color.BLACK);
+		breakGame.setText("BREAK GAME");
+		breakGame.setOnMouseClicked((event) -> {
+			try {
+				int[] arr = new int[1];
+				arr[1] = 0;
+				
+			} catch (Exception e) {
+				
+				Alert alert = new Alert(AlertType.ERROR);
+		        alert.setTitle("Error");
+		        alert.setHeaderText("An error has occured");
+		        String content ="ERROR: " + e.toString() + "\n ";
+		        content += "an error has occured, the game will now close...";
+		        alert.setContentText(content);
+		        alert.showAndWait();
+		        if (alert.getResult() == ButtonType.OK) {
+		            resetGame();
+		        }
+		        curStage.close();
+		        System.exit(1);
+	        
+			}
+		});
 
 	}
 	
@@ -305,27 +337,7 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		gameBoard.setTop(topPlayer);
 		gameBoard.setMargin(topPlayer, new Insets(10,10,10,10));
 		controller.AIturn();
-	    step.setVisible(false);
-	    step.setDisable(false);
-	    while (!step.isDisable()) {
-	        try {
-	            Thread.sleep(1000);
-	        } catch (InterruptedException e) {
-	            e.printStackTrace();
-	        }
-	        controller.startAttackPhase();
-            //System.out.println("This is player 1 card: " + controller.getCardFight()[0][1]);
-            //System.out.println("This is player 2 card: " + controller.getCardFight()[1][1]);
-            //System.out.println(bottomChampions.box.getChildren().toString());
-            displayInteractions();
-            if (controller.getIsRoundOver() != 0) {
-                endAttack.setVisible(true);
-                step.setVisible(false);
-                controller.attackPhaseOver();//so you can see how much health the player took at the end of round
-                displayInteractions();//so it shows the last turn
-                step.setDisable(true);
-            }
-	    }
+	    
 
 	}
 
@@ -916,7 +928,7 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		cost.setTextFill(Color.YELLOW);
 		playerArea.getChildren().add(cost);
 		playerArea.getChildren().add(turnButton);
-		playerArea.getChildren().add(instructButton);
+		playerArea.getChildren().add(breakGame);
 		//playerArea.setAlignment(Pos.CENTER);
 		// upgrade handler
 		// TODO leveling up rerolls shop
@@ -966,21 +978,21 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 		}
 				
 		if(controller.isGameOver()) {
-			System.out.println("its over");
+			System.out.println("Game Over!");
 			if(p1!=null) {
-				// if player 1 won
-				if(p1.getPlayerWon()) {
-					System.out.println("won");
+				if(p1.getLoser()) {
+					System.out.println("Lost");
+					curStage.close();
+					switchGameView(loseGUI.getScene(),loseGUI.getStage(),loseGUI.getTitle(),true);
+				}
+			}
+				// player 1 lost
+				else {
+					System.out.println("Won");
 					curStage.close();
 					switchGameView(winGUI.getScene(),winGUI.getStage(),winGUI.getTitle(),true);
-				}					
-			}
-			// player 1 lost
-			else {
-				System.out.println("lost");
-				curStage.close();
-				switchGameView(loseGUI.getScene(),loseGUI.getStage(),loseGUI.getTitle(),true);
-			}
+				}
+			
 			
 			resetGame();
 			//System.exit(0);
@@ -1071,6 +1083,11 @@ private void remakeHbox(CardFieldUI cardArea, Card[] champSlots, boolean isDragg
 	}
 	public String getTitle() {
 		return title;
+	}
+	
+	public void setDifficulty(int difficulty) {
+		this.difficulty = difficulty;
+		model.setDifficulty(difficulty);
 	}
 
 	/**

@@ -47,49 +47,52 @@ public class InstructionPageUI {
 		title ="Instruction Page";
 		//creates exit button
 		
-		Image exitImage = new Image("assets/Exit.png");
+		Button exitButton = new Button();
+		Image exitImage = new Image("assets/closeGame2.png");
 		exitButtomView = new ImageView(exitImage);
 		exitButtomView.setPreserveRatio(true);
 		exitButtomView.setFitHeight(30);
 		exitButtomView.setSmooth(false);
+		exitButton.setGraphic(exitButtomView);
+		exitButton.setStyle("-fx-background-color: #808080; ");
+		
 		// creates main menu button
+		Button menuButton = new Button();
 		Image mainMenuImage  = new Image("assets/mainMenu.png");
 		mainMenuView = new ImageView(mainMenuImage);
 		mainMenuView.setPreserveRatio(true);
 		mainMenuView.setFitHeight(30);
+		menuButton.setGraphic(mainMenuView);
+		menuButton.setStyle("-fx-background-color: #808080; ");
+		
 		// sets instruction page title
 		Image titleImage = new Image("assets/helpText.png");
 		ImageView titleView = new ImageView(titleImage);
 		titleView.setPreserveRatio(true);
 		titleView.setFitHeight(50);
 		// adds children
-		instructMenuBar.getChildren().add(mainMenuView);
+		instructMenuBar.getChildren().add(menuButton);
 		instructMenuBar.getChildren().add(titleView);
-		instructMenuBar.getChildren().add(exitButtomView);
+		instructMenuBar.getChildren().add(exitButton);
 		instructMenuBar.setSpacing(30);
 		// sets Instruction text
-		Text instructTexts = new Text("Step 1:--------\n"
-				+ "Step 2--------\n"
-				+ "Step 3:--------\n"
-				+ "Step 4:--------\n"
-				+ "Step 5:--------\n");
-		
-		instructTexts.setFont(new Font("Arial", 50));
-		instructTexts.setFill(Color.WHITE);
+		Image instructPic = new Image("assets/instructionPage.png");
+        ImageView instructView = new ImageView(instructPic);
+        instructView.setPreserveRatio(true);
 		// sets background image
 		BackgroundSize screenSize = new BackgroundSize(bounds.getWidth(), bounds.getHeight(),true, true, true, true);
 		instructPage.setBackground(new Background(new BackgroundImage(background, null, null, null, screenSize)));
 		// sets placement of menu bar and text
 		instructPage.setTop(instructMenuBar);
-		instructPage.setCenter(instructTexts);
-		instructTexts.setTextAlignment(TextAlignment.LEFT);
+		instructPage.setCenter(instructView);
 		instructMenuBar.setAlignment(Pos.CENTER);
 		// adds actions to exit button to close page 
-		exitButtomView.setOnMouseClicked(e -> {
+		exitButton.setOnMouseClicked(e -> {
 			stage.close();	
+			System.exit(0);
 		});
 		// adds action to mainMenuButton to close mainMenu;
-		mainMenuView.setOnMouseClicked(e -> {
+		menuButton.setOnMouseClicked(e -> {
 			stage.close();
 			switchGameView(mainGUI.getScene(),mainGUI.getStage(),mainGUI.getTitle(),mainGUI.getPage());
 		
@@ -136,7 +139,6 @@ public class InstructionPageUI {
 		this.stage=stage;
 	}
 	private void switchGameView(Scene gameScene,Stage stage,String title) {
-		
 		stage.setTitle(title);
 		stage.setScene(gameScene);
 		stage.show();

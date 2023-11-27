@@ -21,7 +21,7 @@ public class Player {
     private Shop shop;
     private int attacking_card;
     private int roundsSince;
-    private boolean playerWon;
+    private boolean loser;
 
     /**
      * Creates player object with default stats and zero champions.
@@ -36,7 +36,7 @@ public class Player {
         level 		= shop.getLevel();
         attacking_card  	= 0;
         roundsSince = 0;
-        playerWon=false;
+        loser=false;
     }
     
     /*
@@ -60,7 +60,7 @@ public class Player {
     public void loseHealth(int decrement) {
         health -= decrement;
         if(health<=0) {
-        	playerWon=true;
+        	loser = true;
         }
     }
 
@@ -71,7 +71,7 @@ public class Player {
     public void gainHealth(int increment) {
         health += increment;
         if(health<=0) {
-        	playerWon=true;
+        	loser = true;
         }
     }
 
@@ -183,8 +183,8 @@ public class Player {
     public Shop getShop() {
     	return shop;
     }
-    public boolean getPlayerWon() {
-    	return playerWon;
+    public boolean getLoser() {
+    	return loser;
     }
     /**
      * Buys the character denoted by the index in the shop, removes champion from
