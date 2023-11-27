@@ -61,7 +61,6 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 	private Pair[] moveCardsClicked;
 	private StackPane topStats;
 	private StackPane bottomStats;
-	
 	private boolean attackPhase;
 	private double startX;
 	private double startY;
@@ -935,6 +934,10 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 
 	@Override
 	public void update(Observable o, Object arg) {
+		updateGUI();
+	}
+	
+	public void updateGUI() {
 		// should add if arg is player 1
 		Player p1 = controller.getP1();
 		Card[] champSlots = p1.getBattleField();
@@ -967,20 +970,38 @@ public class AutoBattlerGUIView extends Application implements Observer, Propert
 			if(p1!=null) {
 				// if player 1 won
 				if(p1.getPlayerWon()) {
+					System.out.println("won");
 					curStage.close();
 					switchGameView(winGUI.getScene(),winGUI.getStage(),winGUI.getTitle(),true);
 				}					
 			}
 			// player 1 lost
 			else {
+				System.out.println("lost");
 				curStage.close();
 				switchGameView(loseGUI.getScene(),loseGUI.getStage(),loseGUI.getTitle(),true);
 			}
 			
+			resetGame();
 			//System.exit(0);
 		}
 
 	}
+	public void resetGame() {
+		model = new AutoBattlerModel();
+		model.addObserver(this); //this is how you win the bitches
+		controller = new AutoBattlerController(model);
+		attackPhase = false;
+		controller.resetChampionStats();
+		System.out.println("attack phase is over here");
+		startGame();
+		createShop();
+		gameBoard.setTop(shop);
+		gameBoard.setMargin(shop, new Insets(10,10,10,10));
+		step.setVisible(true);
+		endAttack.setVisible(false);
+	}
+	
 
 private void remakeHbox(CardFieldUI cardArea, Card[] champSlots, boolean isDraggable) {
 		
@@ -1030,6 +1051,9 @@ private void remakeHbox(CardFieldUI cardArea, Card[] champSlots, boolean isDragg
 	public Scene getScene() {
 		// TODO Auto-generated method stub
 		return gameScene;
+	}
+	public Stage getStage() {
+		return curStage;
 	}
 	
 	private void switchGameView(Scene gameScene,Stage stage,String title, boolean isFullScreen) {

@@ -117,10 +117,13 @@ public class StartMenuGUI extends Application {
 		loseGUI = new LoserEndScreenGUI(bounds);
 		loseGUI.setBounds(bounds);
 		loseGUI.setMainMenuGUI(this);
-		gameGUI.setLoseGUI(loseGUI);
+		loseGUI.setGameGUI(gameGUI);
 		loseGUI.setInscructionPageGUI(instructGUI);
+		gameGUI.setLoseGUI(loseGUI);
 		winGUI = new WinnerEndScreenGUI(bounds);
 		winGUI.setBounds(bounds);
+		winGUI.setMainMenuGUI(this);
+		winGUI.setGameGUI(gameGUI);
 		gameGUI.setWinGUI(winGUI);
 		//loseGUI.setBounds(bounds);
 		//loseGUI.setMainMenuGUI(this);

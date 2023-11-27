@@ -69,7 +69,7 @@ public class Shop {
 	private int level;
 
 	public Shop() {
-		shop = null;
+		shop = new Card[0];
 		level = 1;
 		
 		deck = new Creature[25];

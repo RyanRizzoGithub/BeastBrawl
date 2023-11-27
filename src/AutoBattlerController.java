@@ -125,6 +125,7 @@ public class AutoBattlerController{
 	
 	public boolean isGameOver() {
 		if (getP1().getHealth() <= 0 || getP2().getHealth() <= 0) {
+			//model.startNewGame();
 			return true;
 		}
 		return false;

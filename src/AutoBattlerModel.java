@@ -17,13 +17,13 @@ import java.beans.PropertyChangeSupport;
  * the state and progression of the game.
  */
 public class AutoBattlerModel  {
-    private final Player p1;
-    private final Player p2;
+    private Player p1;
+    private Player p2;
     private int round;
     private int attackRound;
     private int [] attacking_arr;
     private int [] defending_arr;
-    private final PropertyChangeSupport propertyChangeSupport;
+    private PropertyChangeSupport propertyChangeSupport;
     private int AIroundsSince;
     boolean debug = true;
     
@@ -45,7 +45,17 @@ public class AutoBattlerModel  {
         propertyChangeSupport = new PropertyChangeSupport(this);
         AIroundsSince = 0;
     }
-    
+    public void startNewGame() {
+    	p1 = new Player();
+        p2 = new Player();
+        //index [0] will be player, index [1] will be card that is attacking
+        attacking_arr = new int[2];
+        defending_arr = new int[2];
+       round = 1;
+       Random rng = new Random();
+      attackRound = rng.nextInt(2);
+        propertyChangeSupport = new PropertyChangeSupport(this);
+    }
     public int [][] getCardInteractions(){
     	int arr [][] = new int [2][1];
     	arr [0] = attacking_arr;
@@ -505,7 +515,7 @@ public class AutoBattlerModel  {
 		if (!aiLevelUp(round)) {
 			// Create a shop selection
 			Card[] selection = p2.getShop().getShop();
-			
+			if(selection.length>0) {
 			// Buy the best card in the shop (based on hp + atk)
 			int bestBuy = 0;
 			for (int i=0; i<selection.length; i++) {
@@ -515,6 +525,7 @@ public class AutoBattlerModel  {
 				}
 			}
 			aiBuyCard(selection, bestBuy);
+			}
 		}
 		
 		// Determine if we should sell any cards
