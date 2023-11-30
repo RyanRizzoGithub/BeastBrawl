@@ -73,8 +73,7 @@ public class AI {
 		// If this is an easy difficulty ai
 		if (difficulty == 1) {
 			// Check if we can level up
-			if (!levelUp(round)) {
-							
+			if (!levelUp(round)) {		
 				// Create a shop selection
 				Card[] selection = shop.getShop();
 				
